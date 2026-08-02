@@ -24,6 +24,8 @@ from __future__ import annotations
 
 import argparse
 import logging
+import random
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.error import URLError
@@ -50,7 +52,7 @@ def _fetch_bytes(url: str, timeout: int = 30) -> bytes:
         return resp.read()
 
 
-def _download_one(remote_path: str, dest: Path, max_retries: int = 3) -> bool:
+def _download_one(remote_path: str, dest: Path, max_retries: int = 6) -> bool:
     if dest.exists() and dest.stat().st_size > 0:
         return True
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -61,7 +63,15 @@ def _download_one(remote_path: str, dest: Path, max_retries: int = 3) -> bool:
             dest.write_bytes(data)
             return True
         except URLError as exc:
-            logger.warning("attempt %d failed for %s: %s", attempt + 1, url, exc)
+            # HF's CDN rate-limits (HTTP 429) hard under concurrent load;
+            # retrying immediately just draws more 429s. Exponential
+            # backoff with jitter (not a fixed delay) so a whole worker
+            # pool doesn't retry in lockstep and re-trigger the limit.
+            delay = min(30.0, (2**attempt) * 0.5) + random.uniform(0, 0.5)
+            logger.warning(
+                "attempt %d failed for %s: %s (retrying in %.1fs)", attempt + 1, url, exc, delay
+            )
+            time.sleep(delay)
     return False
 
 
