@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data & model artifacts (large / regenerable -- see docs for how to rebuild)
+/data/
+/checkpoints/
+/results/
+/exports/
+*.pt
+*.onnx
+*.avi
+*.mp4
+
+# misc
+*.log
+.DS_Store

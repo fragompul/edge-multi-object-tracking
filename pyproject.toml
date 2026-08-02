@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emot"
+version = "0.1.0"
+description = "Edge multi-object tracking: YOLO backbone benchmark, ByteTrack vs DeepSORT, ONNX/quantized export, MOT17 analytics"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Fran Gomez" }]
+dependencies = [
+    "torch>=2.2",
+    "torchvision>=0.17",
+    "ultralytics>=8.3",
+    "numpy>=1.26",
+    "scipy>=1.12",
+    "pandas>=2.2",
+    "opencv-python-headless>=4.9",
+    "Pillow>=10.2",
+    "motmetrics>=1.4",
+    "onnx>=1.16",
+    "onnxruntime>=1.18",
+    "optuna>=3.6",
+    "tqdm>=4.66",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+dashboard = [
+    "dash>=2.17",
+    "dash-bootstrap-components>=1.6",
+    "plotly>=5.22",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
