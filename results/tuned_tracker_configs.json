@@ -1,0 +1,25 @@
+{
+  "tuned_on_sequence": "MOT17-02",
+  "tuned_on_backbone": "yolo11s",
+  "n_trials": 30,
+  "bytetrack": {
+    "best_mota": 0.2975916230366492,
+    "params": {
+      "high_conf_threshold": 0.4408720217687306,
+      "low_conf_threshold": 0.10919328753293181,
+      "match_iou_threshold": 0.6617659417803933,
+      "low_match_iou_threshold": 0.5523626587166397,
+      "min_hits": 2,
+      "max_age": 45
+    }
+  },
+  "deepsort": {
+    "best_mota": 0.2950785340314136,
+    "params": {
+      "max_cosine_distance": 0.4856587537883909,
+      "iou_fallback_threshold": 0.3338836761725239,
+      "min_hits": 2,
+      "max_age": 42
+    }
+  }
+}
