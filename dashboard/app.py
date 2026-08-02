@@ -52,4 +52,10 @@ app.layout = html.Div(
 )
 
 if __name__ == "__main__":
-    app.run(debug=True, host="127.0.0.1", port=8050)
+    import os
+
+    # Debug/reloader off by default: the reloader forks a child process,
+    # which complicates process management for both the CI smoke test
+    # (which needs a single, killable PID) and Docker-less local runs.
+    # Opt in explicitly with DASH_DEBUG=1 during development.
+    app.run(debug=os.environ.get("DASH_DEBUG") == "1", host="127.0.0.1", port=8050)
