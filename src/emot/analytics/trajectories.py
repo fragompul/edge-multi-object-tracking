@@ -87,11 +87,10 @@ def occupancy_heatmap(
     """2D histogram of track-center positions over the whole sequence,
     normalized to `[0, 1]` -- the standard "where did people spend time"
     view."""
-    all_points = np.concatenate(
-        [history.as_array() for history in trajectories.values() if history.centers]
-    )
-    if len(all_points) == 0:
+    non_empty = [history.as_array() for history in trajectories.values() if history.centers]
+    if not non_empty:
         return np.zeros((bins, bins))
+    all_points = np.concatenate(non_empty)
 
     heatmap, _, _ = np.histogram2d(
         all_points[:, 0],
