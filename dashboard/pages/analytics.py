@@ -16,6 +16,7 @@ from pathlib import Path
 
 import dash
 import dash_bootstrap_components as dbc
+import numpy as np
 import plotly.graph_objects as go
 from dash import Input, Output, callback, dcc, html
 from data_loader import available_sequences, load_sequence_ground_truth
@@ -78,7 +79,7 @@ def layout() -> html.Div:
     )
 
 
-def _compute_tracks_by_frame(sequence: str, backbone: str) -> dict[int, dict[int, object]]:
+def _compute_tracks_by_frame(sequence: str, backbone: str) -> dict[int, dict[int, np.ndarray]]:
     cache_path = CACHE_DIR / sequence / f"{backbone}.npz"
     if not cache_path.exists():
         return {}
@@ -86,7 +87,7 @@ def _compute_tracks_by_frame(sequence: str, backbone: str) -> dict[int, dict[int
     seq_info, _ = load_sequence_ground_truth(DATA_ROOT, sequence)
 
     tracker = ByteTracker()
-    frames: dict[int, dict[int, object]] = {}
+    frames: dict[int, dict[int, np.ndarray]] = {}
     for frame_idx in iter_frame_indices(seq_info):
         tracks = tracker.update(detections_by_frame.get(frame_idx, []))
         frames[frame_idx] = {t.track_id: t.xyxy for t in tracks}
