@@ -40,6 +40,8 @@ def run_one(sequence: str, backbone_weights: str, backbone_name: str, data_root:
     for frame_idx in iter_frame_indices(seq_info):
         frame_path = seq_dir / "img1" / f"{frame_idx:06d}.jpg"
         image = cv2.imread(str(frame_path))
+        if image is None:
+            raise FileNotFoundError(f"could not read frame: {frame_path}")
         detections, elapsed = detector.detect(image)
         latencies_ms.append(elapsed * 1000)
         for det in detections:

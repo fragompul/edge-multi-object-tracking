@@ -69,7 +69,9 @@ def tune(
 
     detections = load_cached_detections(cache_dir / sequence / f"{backbone_name}.npz")
 
-    logger.info("Tuning ByteTrack on %s/%s (%d val frames)...", sequence, backbone_name, len(val_frames))
+    logger.info(
+        "Tuning ByteTrack on %s/%s (%d val frames)...", sequence, backbone_name, len(val_frames)
+    )
     bt_study = optuna.create_study(direction="maximize")
     bt_study.optimize(
         lambda trial: _bytetrack_objective(trial, detections, gt_df, val_frames),

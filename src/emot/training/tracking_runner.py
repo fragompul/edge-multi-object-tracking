@@ -76,8 +76,12 @@ def run_deepsort(
     accumulator = MOTAccumulator()
     for frame_idx in frame_indices:
         dets = detections_by_frame.get(frame_idx, [])
-        image = cv2.imread(str(frame_path(seq_dir, frame_idx)))
-        crops = [_crop(image, d.xyxy) for d in dets] if dets else []
+        crops: list[np.ndarray] = []
+        if dets:
+            image = cv2.imread(str(frame_path(seq_dir, frame_idx)))
+            if image is None:
+                raise FileNotFoundError(f"could not read frame {frame_idx} in {seq_dir}")
+            crops = [_crop(image, d.xyxy) for d in dets]
         embeddings = embedder.embed_crops(crops)
         tracks = tracker.update(dets, embeddings)
         gt_array = gt_to_mot_array(gt_df, frame_idx)

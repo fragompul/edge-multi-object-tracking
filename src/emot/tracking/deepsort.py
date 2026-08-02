@@ -125,12 +125,9 @@ class DeepSortTracker:
             ious = iou_matrix(track_boxes, rem_det_boxes)
             iou_cost = 1.0 - ious
             r2, c2 = linear_sum_assignment(iou_cost)
-            still_unmatched_tracks, still_unmatched_dets = set(), set()
             for r, c in zip(r2, c2, strict=True):
                 if ious[r, c] >= cfg.iou_fallback_threshold:
                     matches.append((unmatched_track_idx[r], unmatched_det_idx[c]))
-                else:
-                    still_unmatched_tracks.add(unmatched_track_idx[r])
             unmatched_track_idx = [
                 i for i in unmatched_track_idx if i not in {m[0] for m in matches}
             ]

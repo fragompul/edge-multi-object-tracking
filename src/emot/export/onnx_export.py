@@ -27,7 +27,9 @@ def export_onnx(weights: str, output_dir: Path, image_size: int = 640) -> Path:
     weights by default; this moves it into `output_dir` for a
     predictable, per-benchmark-run layout."""
     model = YOLO(weights)
-    exported_path = Path(model.export(format="onnx", imgsz=image_size, dynamic=False, simplify=True))
+    exported_path = Path(
+        model.export(format="onnx", imgsz=image_size, dynamic=False, simplify=True)
+    )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     dest = output_dir / exported_path.name

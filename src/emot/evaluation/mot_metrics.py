@@ -41,7 +41,9 @@ def _xyxy_to_ltwh(xyxy: np.ndarray) -> np.ndarray:
     return np.array([left, top, right - left, bottom - top])
 
 
-def _iou_distance_matrix(gt_boxes_ltwh: np.ndarray, pred_boxes_ltwh: np.ndarray, max_iou_distance: float) -> np.ndarray:
+def _iou_distance_matrix(
+    gt_boxes_ltwh: np.ndarray, pred_boxes_ltwh: np.ndarray, max_iou_distance: float
+) -> np.ndarray:
     """Reimplements `motmetrics.distances.iou_matrix` in terms of this
     project's own IoU utility, instead of calling the library function
     directly.
@@ -81,7 +83,11 @@ class MOTAccumulator:
         gt_boxes = gt_array[:, 1:5] if len(gt_array) else np.zeros((0, 4))
 
         pred_ids = [t.track_id for t in predicted_tracks]
-        pred_boxes = np.array([_xyxy_to_ltwh(t.xyxy) for t in predicted_tracks]) if predicted_tracks else np.zeros((0, 4))
+        pred_boxes = (
+            np.array([_xyxy_to_ltwh(t.xyxy) for t in predicted_tracks])
+            if predicted_tracks
+            else np.zeros((0, 4))
+        )
 
         distances = _iou_distance_matrix(gt_boxes, pred_boxes, self.max_iou_distance)
         self.acc.update(gt_ids, pred_ids, distances)

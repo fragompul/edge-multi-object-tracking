@@ -99,7 +99,9 @@ def download_mot17_subset(
     for sequence in sequences:
         jobs.extend(_sequence_jobs(sequence, output_dir))
 
-    logger.info("Downloading %d files across %s with %d workers...", len(jobs), sequences, max_workers)
+    logger.info(
+        "Downloading %d files across %s with %d workers...", len(jobs), sequences, max_workers
+    )
     ok, failed = 0, 0
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {pool.submit(_download_one, remote, dest): dest for remote, dest in jobs}

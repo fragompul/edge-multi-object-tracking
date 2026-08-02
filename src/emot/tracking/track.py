@@ -44,7 +44,9 @@ class Track:
         self.kalman.predict()
         self.time_since_update += 1
 
-    def update(self, xyxy: np.ndarray, confidence: float, embedding: np.ndarray | None = None) -> None:
+    def update(
+        self, xyxy: np.ndarray, confidence: float, embedding: np.ndarray | None = None
+    ) -> None:
         self.kalman.update(xyxy)
         self.confidence = confidence
         self.hits += 1
@@ -61,7 +63,7 @@ class Track:
             self.state = TrackState.LOST
 
     def confirm_if_ready(self, min_hits: int) -> None:
-        if self.state == TrackState.TENTATIVE and self.hits >= min_hits:
-            self.state = TrackState.CONFIRMED
-        elif self.state == TrackState.LOST and self.time_since_update == 0:
+        ready_from_tentative = self.state == TrackState.TENTATIVE and self.hits >= min_hits
+        ready_from_lost = self.state == TrackState.LOST and self.time_since_update == 0
+        if ready_from_tentative or ready_from_lost:
             self.state = TrackState.CONFIRMED

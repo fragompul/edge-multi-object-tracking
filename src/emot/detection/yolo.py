@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 import numpy as np
 from ultralytics import YOLO
+from ultralytics.engine.results import Results
 
 COCO_PERSON_CLASS_ID = 0
 
@@ -59,17 +60,27 @@ class PersonDetector:
         plus the wall-clock inference time in seconds, for latency
         benchmarking."""
         start = time.perf_counter()
-        results = self.model.predict(
-            image,
-            classes=[COCO_PERSON_CLASS_ID],
-            conf=self.confidence_threshold,
-            device=self.device,
-            verbose=False,
+        results = list(
+            self.model.predict(
+                image,
+                classes=[COCO_PERSON_CLASS_ID],
+                conf=self.confidence_threshold,
+                device=self.device,
+                verbose=False,
+            )
         )
         elapsed = time.perf_counter() - start
 
         detections = []
-        boxes = results[0].boxes
-        for xyxy, conf in zip(boxes.xyxy.cpu().numpy(), boxes.conf.cpu().numpy(), strict=True):
+        result = results[0]
+        assert isinstance(result, Results)
+        boxes = result.boxes
+        assert boxes is not None
+        # ultralytics' stubs type `Boxes.xyxy`/`.conf` as `Tensor | ndarray` (the ndarray
+        # variant only applies in ONNX/TensorRT streaming modes this project doesn't use);
+        # always a Tensor here, hence the targeted ignore rather than a broad cast.
+        xyxy_arr = boxes.xyxy.cpu().numpy()  # type: ignore[union-attr]
+        conf_arr = boxes.conf.cpu().numpy()  # type: ignore[union-attr]
+        for xyxy, conf in zip(xyxy_arr, conf_arr, strict=True):
             detections.append(Detection(xyxy=xyxy, confidence=float(conf)))
         return detections, elapsed

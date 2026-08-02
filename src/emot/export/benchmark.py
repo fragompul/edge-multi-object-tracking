@@ -16,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 
-from emot.detection.yolo import PersonDetector
+from emot.detection.yolo import Detection, PersonDetector
 from emot.tracking.iou import iou_matrix
 
 
@@ -30,7 +30,9 @@ class ExportBenchmarkResult:
     mean_iou_vs_reference: float | None  # None for the reference variant itself
 
 
-def _benchmark_variant(weights_path: Path, images: list[np.ndarray]) -> tuple[list, float]:
+def _benchmark_variant(
+    weights_path: Path, images: list[np.ndarray]
+) -> tuple[list[list[Detection]], list[float]]:
     detector = PersonDetector(str(weights_path))
     latencies_ms = []
     all_detections = []
@@ -38,11 +40,11 @@ def _benchmark_variant(weights_path: Path, images: list[np.ndarray]) -> tuple[li
         detections, elapsed = detector.detect(image)
         latencies_ms.append(elapsed * 1000)
         all_detections.append(detections)
-    return all_detections, latencies_ms  # type: ignore[return-value]
+    return all_detections, latencies_ms
 
 
 def _mean_iou_vs_reference(
-    reference: list, candidate: list
+    reference: list[list[Detection]], candidate: list[list[Detection]]
 ) -> float:
     """Mean best-match IoU between each reference-frame box set and the
     candidate's, averaged over frames -- a cheap proxy for "how much did
@@ -70,8 +72,8 @@ def benchmark_variant(
     variant_name: str,
     weights_path: Path,
     images: list[np.ndarray],
-    reference_detections: list | None = None,
-) -> tuple[ExportBenchmarkResult, list]:
+    reference_detections: list[list[Detection]] | None = None,
+) -> tuple[ExportBenchmarkResult, list[list[Detection]]]:
     detections, latencies_ms = _benchmark_variant(weights_path, images)
 
     # First run includes backend warmup (session/graph build) -- excluded

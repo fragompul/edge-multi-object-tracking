@@ -44,7 +44,9 @@ def main() -> None:
     parser.add_argument("--data-root", type=Path, default=Path("data/mot17"))
     parser.add_argument("--cache-dir", type=Path, default=Path("cache/detections"))
     parser.add_argument("--results-dir", type=Path, default=Path("results"))
-    parser.add_argument("--tuned-config", type=Path, default=Path("results/tuned_tracker_configs.json"))
+    parser.add_argument(
+        "--tuned-config", type=Path, default=Path("results/tuned_tracker_configs.json")
+    )
     parser.add_argument(
         "--sequences", nargs="+", default=["MOT17-02", "MOT17-04", "MOT17-11", "MOT17-13"]
     )
