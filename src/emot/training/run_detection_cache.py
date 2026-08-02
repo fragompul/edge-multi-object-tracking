@@ -74,7 +74,11 @@ def main() -> None:
     args = parser.parse_args()
 
     backbone_by_name = {b.name: b for b in BACKBONES}
-    summary = {}
+    summary_path = args.cache_dir / "summary.json"
+
+    def _load_summary() -> dict:
+        return json.loads(summary_path.read_text()) if summary_path.exists() else {}
+
     for sequence in args.sequences:
         for backbone_name in args.backbones:
             cache_path = _cache_path(args.cache_dir, sequence, backbone_name)
@@ -88,17 +92,21 @@ def main() -> None:
             elapsed = time.time() - start
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             np.savez_compressed(cache_path, **arrays)
-            summary[f"{sequence}/{backbone_name}"] = {
+
+            # Written after every (sequence, backbone) pair, not just once
+            # at the end -- this loop runs for ~1-2 hours, and losing all
+            # latency/count metadata to an interruption near the end would
+            # be a needless resumability gap the per-file npz caches don't
+            # otherwise have.
+            entry = {
                 "num_detections": int(len(arrays["frame_id"])),
                 "mean_latency_ms": float(arrays["mean_latency_ms"][0]),
                 "wall_time_sec": elapsed,
             }
-            logger.info("Done: %s / %s -> %s", sequence, backbone_name, summary[f"{sequence}/{backbone_name}"])
-
-    summary_path = args.cache_dir / "summary.json"
-    existing = json.loads(summary_path.read_text()) if summary_path.exists() else {}
-    existing.update(summary)
-    summary_path.write_text(json.dumps(existing, indent=2))
+            existing = _load_summary()
+            existing[f"{sequence}/{backbone_name}"] = entry
+            summary_path.write_text(json.dumps(existing, indent=2))
+            logger.info("Done: %s / %s -> %s", sequence, backbone_name, entry)
 
 
 if __name__ == "__main__":
