@@ -1,0 +1,164 @@
+[
+  {
+    "backbone": "yolov8n",
+    "variant": "pytorch_fp32",
+    "file_size_mb": 6.246372222900391,
+    "mean_latency_ms": 61.73390626329484,
+    "p95_latency_ms": 65.89147539925762,
+    "mean_detections_per_frame": 9.45,
+    "mean_iou_vs_reference": null
+  },
+  {
+    "backbone": "yolov8n",
+    "variant": "onnx_fp32",
+    "file_size_mb": 12.255770683288574,
+    "mean_latency_ms": 135.58755063164236,
+    "p95_latency_ms": 161.60106329989503,
+    "mean_detections_per_frame": 9.95,
+    "mean_iou_vs_reference": 0.9942549407482147
+  },
+  {
+    "backbone": "yolov8n",
+    "variant": "onnx_int8",
+    "file_size_mb": 3.3417882919311523,
+    "mean_latency_ms": 142.91757194721293,
+    "p95_latency_ms": 183.88830370058707,
+    "mean_detections_per_frame": 9.4,
+    "mean_iou_vs_reference": 0.9036509066820144
+  },
+  {
+    "backbone": "yolov8s",
+    "variant": "pytorch_fp32",
+    "file_size_mb": 21.54233169555664,
+    "mean_latency_ms": 148.8660408423656,
+    "p95_latency_ms": 169.09783569917636,
+    "mean_detections_per_frame": 10.45,
+    "mean_iou_vs_reference": null
+  },
+  {
+    "backbone": "yolov8s",
+    "variant": "onnx_fp32",
+    "file_size_mb": 42.791266441345215,
+    "mean_latency_ms": 262.0361399473806,
+    "p95_latency_ms": 321.4587547005067,
+    "mean_detections_per_frame": 10.4,
+    "mean_iou_vs_reference": 0.997298127412796
+  },
+  {
+    "backbone": "yolov8s",
+    "variant": "onnx_int8",
+    "file_size_mb": 10.989349365234375,
+    "mean_latency_ms": 263.1718464736447,
+    "p95_latency_ms": 310.45591019956186,
+    "mean_detections_per_frame": 10.95,
+    "mean_iou_vs_reference": 0.948059692978859
+  },
+  {
+    "backbone": "yolov8m",
+    "variant": "pytorch_fp32",
+    "file_size_mb": 49.72160720825195,
+    "mean_latency_ms": 405.6929116318076,
+    "p95_latency_ms": 456.92989480048675,
+    "mean_detections_per_frame": 12.25,
+    "mean_iou_vs_reference": null
+  },
+  {
+    "backbone": "yolov8m",
+    "variant": "onnx_fp32",
+    "file_size_mb": 99.00054931640625,
+    "mean_latency_ms": 728.7305699472582,
+    "p95_latency_ms": 763.0833797002197,
+    "mean_detections_per_frame": 12.3,
+    "mean_iou_vs_reference": 0.9940842092037201
+  },
+  {
+    "backbone": "yolov8m",
+    "variant": "onnx_int8",
+    "file_size_mb": 25.10411834716797,
+    "mean_latency_ms": 500.1863114736663,
+    "p95_latency_ms": 619.4035151997014,
+    "mean_detections_per_frame": 11.1,
+    "mean_iou_vs_reference": 0.8722734242677689
+  },
+  {
+    "backbone": "yolo11n",
+    "variant": "pytorch_fp32",
+    "file_size_mb": 5.353702545166016,
+    "mean_latency_ms": 62.67503773692864,
+    "p95_latency_ms": 66.03550480012926,
+    "mean_detections_per_frame": 11.3,
+    "mean_iou_vs_reference": null
+  },
+  {
+    "backbone": "yolo11n",
+    "variant": "onnx_fp32",
+    "file_size_mb": 10.243796348571777,
+    "mean_latency_ms": 110.53439247342267,
+    "p95_latency_ms": 142.90218899932367,
+    "mean_detections_per_frame": 12.95,
+    "mean_iou_vs_reference": 0.9898135840892792
+  },
+  {
+    "backbone": "yolo11n",
+    "variant": "onnx_int8",
+    "file_size_mb": 2.908781051635742,
+    "mean_latency_ms": 123.7939989999799,
+    "p95_latency_ms": 130.00422340028305,
+    "mean_detections_per_frame": 11.55,
+    "mean_iou_vs_reference": 0.8606684297323227
+  },
+  {
+    "backbone": "yolo11s",
+    "variant": "pytorch_fp32",
+    "file_size_mb": 18.419010162353516,
+    "mean_latency_ms": 140.71271947346088,
+    "p95_latency_ms": 151.7031063005561,
+    "mean_detections_per_frame": 9.9,
+    "mean_iou_vs_reference": null
+  },
+  {
+    "backbone": "yolo11s",
+    "variant": "onnx_fp32",
+    "file_size_mb": 36.2890100479126,
+    "mean_latency_ms": 202.31503710534813,
+    "p95_latency_ms": 238.3430067007793,
+    "mean_detections_per_frame": 10.05,
+    "mean_iou_vs_reference": 0.98150754570961
+  },
+  {
+    "backbone": "yolo11s",
+    "variant": "onnx_int8",
+    "file_size_mb": 9.440845489501953,
+    "mean_latency_ms": 300.36381099977774,
+    "p95_latency_ms": 334.33649270045856,
+    "mean_detections_per_frame": 11.8,
+    "mean_iou_vs_reference": 0.9420538365840911
+  },
+  {
+    "backbone": "yolo11m",
+    "variant": "pytorch_fp32",
+    "file_size_mb": 38.799400329589844,
+    "mean_latency_ms": 351.25589647367104,
+    "p95_latency_ms": 364.83261050034343,
+    "mean_detections_per_frame": 10.85,
+    "mean_iou_vs_reference": null
+  },
+  {
+    "backbone": "yolo11m",
+    "variant": "onnx_fp32",
+    "file_size_mb": 76.93641376495361,
+    "mean_latency_ms": 452.6807579996354,
+    "p95_latency_ms": 461.8812115000764,
+    "mean_detections_per_frame": 11.8,
+    "mean_iou_vs_reference": 0.9750111073255538
+  },
+  {
+    "backbone": "yolo11m",
+    "variant": "onnx_int8",
+    "file_size_mb": 19.684054374694824,
+    "mean_latency_ms": 505.95493436843464,
+    "p95_latency_ms": 548.6082082003122,
+    "mean_detections_per_frame": 11.05,
+    "mean_iou_vs_reference": 0.90042085647583
+  }
+]
