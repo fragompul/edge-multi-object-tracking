@@ -15,9 +15,11 @@ venv/
 htmlcov/
 
 # Data & model artifacts (large / regenerable -- see docs for how to rebuild)
+# results/ is deliberately NOT ignored: it's small JSON metrics, committed
+# so the numbers in docs/results.md always match what's in the repo.
 /data/
 /checkpoints/
-/results/
+/cache/
 /exports/
 *.pt
 *.onnx
