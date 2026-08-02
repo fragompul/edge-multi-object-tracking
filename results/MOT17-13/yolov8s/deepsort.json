@@ -1,0 +1,15 @@
+{
+  "sequence": "MOT17-13",
+  "backbone": "yolov8s",
+  "tracker": "deepsort",
+  "mota": 0.3026971310771345,
+  "motp": 0.2510281894980483,
+  "idf1": 0.41309255079006774,
+  "num_switches": 158,
+  "num_false_positives": 755,
+  "num_misses": 7205,
+  "mostly_tracked": 19,
+  "mostly_lost": 51,
+  "num_frames": 750,
+  "eval_time_sec": 59.29085969924927
+}

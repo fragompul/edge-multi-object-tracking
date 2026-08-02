@@ -1,0 +1,15 @@
+{
+  "sequence": "MOT17-13",
+  "backbone": "yolo11s",
+  "tracker": "bytetrack",
+  "mota": 0.27246177632709156,
+  "motp": 0.24056482651271444,
+  "idf1": 0.39552715654952075,
+  "num_switches": 110,
+  "num_false_positives": 363,
+  "num_misses": 7997,
+  "mostly_tracked": 11,
+  "mostly_lost": 58,
+  "num_frames": 750,
+  "eval_time_sec": 1.168135643005371
+}
