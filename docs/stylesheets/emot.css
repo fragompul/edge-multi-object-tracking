@@ -1,0 +1,12 @@
+:root, [data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0b1020;
+  --md-primary-bg-color: #e6eaf7;
+  --md-accent-fg-color: #22d3ee;
+  --md-default-bg-color: #0b1020;
+  --md-default-fg-color: #e6eaf7;
+  --md-typeset-a-color: #22d3ee;
+  --md-code-bg-color: #121936;
+}
+.md-typeset h1, .md-typeset h2 { letter-spacing: -0.02em; }
+.md-typeset img { border-radius: 10px; }
+.md-typeset table:not([class]) { font-size: 0.8rem; }

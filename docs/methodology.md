@@ -1,120 +1,70 @@
 # Methodology
 
-## Problem statement
+## Data
 
-Multi-object tracking (MOT) asks two questions per video frame: *where*
-are the objects of interest (detection), and *which object in this frame
-is the same object as in the previous frame* (association/identity).
-Detection alone is well-studied and largely solved for common object
-classes; the harder, more interesting engineering problem -- and the one
-that actually determines whether a tracking system is usable for
-analytics (counting, dwell time, trajectory analysis) -- is identity
-association under occlusion, crowding, and appearance changes. This
-project benchmarks the detection side (YOLO backbone speed/accuracy
-trade-offs, edge export/quantization) and the association side
-(motion-only ByteTrack vs. motion+appearance DeepSORT) independently,
-then evaluates the full pipeline end-to-end with standard MOT metrics.
+MOT17 training split (Milan et al., 2016): **7 sequences, 5,330 frames**, public pedestrian ground
+truth. Three are static-camera (02, 04, 09), four moving (05, 10, 11, 13); the split is *measured*, not
+assumed -- the camera-motion estimator reads 0.2-0.4 px/frame of global motion on the first group and
+4.8-12.7 px on the second (`results/sequences.json`). Sequences range from 8 to 45 people per frame,
+640x480 at 14 fps to 1080p at 30 fps.
 
-## Dataset
+MOT17 ships each sequence three times (DPM / FRCNN / SDP) with identical images and different public
+detections; only one copy is downloaded and **the public detections are not used** -- all detectors here are our own.
 
-**MOT17** (Milan et al., "MOT16: A Benchmark for Multi-Object Tracking,"
-arXiv:1603.00831 -- MOT17 extends MOT16 with refined ground truth and
-three parallel public-detection sets per sequence). A **4-sequence
-subset** is used: `MOT17-02`, `MOT17-04`, `MOT17-11`, `MOT17-13`, chosen
-for visual diversity within a CPU/time budget:
+Ground truth used: pedestrian class, `consider` flag set (the standard MOT filter). The official test
+split's ground truth is private and is not used.
 
-| Sequence | Camera | Setting | Density |
-| --- | --- | --- | --- |
-| MOT17-02 | Static | Outdoor daytime street | Dense |
-| MOT17-04 | Static | Outdoor daytime street (different angle, longer) | Dense |
-| MOT17-11 | Moving (handheld) | Indoor shopping mall | Moderate |
-| MOT17-13 | Moving (onboard) | Outdoor night, bus interior/street | Moderate |
+## Detection
 
-Only the `-FRCNN` detector-variant folder is downloaded per sequence
-(MOT17 repeats each sequence's images 3x under `-DPM`/`-FRCNN`/`-SDP`,
-differing only in the bundled public detections, which this project
-doesn't use -- it runs its own YOLO detectors instead). See
-`docs/limitations.md` for the full scope discussion (11 excluded
-sequences, official-host unavailability, etc.).
+Off-the-shelf COCO-pretrained Ultralytics YOLOv8 and YOLO11 (n/s/m), person class only, run once per
+(sequence, backbone, input size) down to confidence 0.1 and cached. Each tracker applies its own
+thresholds to that shared input, so **differences between trackers are differences in association alone**.
 
-Sourced from the public Hugging Face mirror `Lekim89/MOT17` (the official
-`motchallenge.net` host was unreachable from this environment --
-connection refused, verified not a transient blip) via
-`src/emot/data/download_mot17.py`.
+## Trackers
 
-## Detection: backbone benchmark
+All implemented in this repository ([Trackers](trackers.md)). The comparison is a ladder, so that every
+step isolates one idea:
 
-Six pretrained, COCO-trained YOLO checkpoints, filtered to the `person`
-class (COCO class 0):
+| Variant | Differs from the previous rung by |
+| --- | --- |
+| ByteTrack | baseline (motion only, two-stage IoU) |
+| BoT-SORT (CMC) | + camera-motion compensation |
+| BoT-SORT (ReID only) | + OSNet appearance in the association cost (no CMC) |
+| BoT-SORT (CMC + ReID) | both |
+| DeepSORT (ResNet18) | the original baseline: gated cosine on generic ImageNet features, single-stage |
+| DeepSORT (OSNet) | + a real ReID embedding |
+| DeepSORT (OSNet + cascade) | + the paper's matching cascade |
 
-- **YOLOv8**: n / s / m (Ultralytics, prior generation)
-- **YOLO11**: n / s / m (Ultralytics, current generation at the time of
-  writing)
+## Metrics
 
-Used off-the-shelf, not fine-tuned on MOT17: the benchmark's purpose is
-comparing backbones' existing detection quality and CPU latency, not
-producing a MOT17-specialized detector. Detections are cached once per
-`(sequence, backbone)` pair (`src/emot/training/run_detection_cache.py`)
-and reused by every downstream tracker, since detection is the expensive
-step and doesn't depend on which tracker consumes it.
+- **HOTA** (Luiten et al., 2021): geometric mean of DetA (detection) and AssA (association), averaged over 19 IoU
+  thresholds. The headline metric because it separates "did you find people" from "did you keep their identities".
+  Implemented from the paper; matches TrackEval to 10 decimals on a realistic scenario.
+- **IDF1, MOTA, ID switches, MOTP:** CLEAR-MOT via `py-motmetrics` (IoU distance computed locally).
+- **Detection AP50 / AP:** COCO 101-point AP against ground truth; persons below 25% visibility are ignore regions.
 
-## Tracking: ByteTrack vs. DeepSORT
+## Tuning (and its limits)
 
-Both built from a shared constant-velocity Kalman filter
-(`src/emot/tracking/kalman.py`, over `[cx, cy, aspect, height]` state --
-the standard SORT-family parameterization) and IoU utility
-(`src/emot/tracking/iou.py`):
+Each tracker family is tuned by Optuna (60 TPE trials, seed 0) on the **trailing 25% of MOT17-02** with
+`yolo11s` detections, objective **HOTA**. BoT-SORT inherits ByteTrack's association thresholds and tunes only its
+appearance-fusion parameters, so the CMC/ReID ablation is not confounded by extra tuning. The tuned configs are
+then applied unchanged to all 42 (sequence, backbone) cells.
 
-- **ByteTrack** (Zhang et al., ECCV 2022): two-stage association --
-  high-confidence detections matched first via Hungarian assignment on
-  IoU, then tracks still unmatched are given a second chance against
-  low-confidence detections (never used to spawn new tracks). This
-  recovers occluded/blurred detections that plain SORT would discard.
-- **DeepSORT** (Wojke et al., ICIP 2017): a hard Mahalanobis gate on the
-  Kalman filter's predicted position, then cosine distance between a
-  detection's appearance embedding and a track's recent embedding
-  gallery among gated candidates. The appearance embedding is a frozen,
-  ImageNet-pretrained ResNet18's global-average-pooled features (512-d,
-  L2-normalized) rather than a dedicated person-ReID network -- a
-  documented simplification, see `docs/limitations.md`.
+Because tuning used part of MOT17-02, every table that matters also reports a **held-out** mean over the other six sequences.
 
-Both trackers' association thresholds (confidence/IoU/cosine-distance
-gates, `min_hits`, `max_age`) are tuned with **Optuna**
-(`src/emot/training/tune_trackers.py`), maximizing MOTA on a **temporal**
-val split (the trailing 25% of frames in the tuning sequence -- never a
-random per-frame split, which would leak the same track's future/past
-context across train and val).
+## Evaluation protocol
 
-## Evaluation
+Scored on the **whole sequence** (tuning only used a slice of one). IoU matching threshold 0.5 for CLEAR-MOT.
+No distractor-class filtering (so absolute scores are *not* comparable to MOTChallenge leaderboard numbers; relative
+comparisons within this repository are what the benchmark supports).
 
-**py-motmetrics**, the standard CLEAR-MOT + IDF1 reference implementation
-(`src/emot/evaluation/mot_metrics.py`), reporting MOTA, MOTP, IDF1,
-ID-switch count, false positives, misses, and mostly-tracked/mostly-lost
-counts. Ground truth is filtered to `class == 1` (pedestrian) with
-`consider_flag == 1`, matching MOT17's own evaluation convention.
+## Edge benchmark
 
-## Edge export & quantization benchmark
+Separate processes, 150 frames from six 1080p sequences, 5 warm-up frames, AP measured on the same frames,
+calibration frames disjoint from evaluation frames ([Edge deployment](edge.md)).
 
-Each backbone is exported to ONNX (static shape, simplified graph) and
-dynamically quantized to INT8 via `onnxruntime.quantization`. Latency,
-model size, and a detection-agreement proxy (mean best-match IoU against
-the PyTorch FP32 reference, not a full mAP -- see
-`docs/limitations.md`) are benchmarked across all three variants
-(`src/emot/export/benchmark.py`), CPU-only.
+## Reproducibility
 
-## Analytics
-
-Derived from tracked positions, not re-detected: per-track trajectories,
-a configurable line-crossing counter (directed, via 2D cross-product
-sign), and a 2D occupancy heatmap -- all computed live in the dashboard
-from cached detections replayed through ByteTrack (cheap: no neural
-network inference in the replay, just Kalman + Hungarian matching), so
-this doesn't require its own pre-computed results cache.
-
-## Compute environment
-
-CPU-only laptop (8 cores, ~7.4GB RAM, no GPU). Every stage is sized to
-finish in hours: detection caching is the dominant cost (~2-3h for the
-full `4 sequences x 6 backbones` grid at CPU-only YOLO speeds), reused
-across all downstream tracking/tuning/evaluation runs rather than
-re-incurred per experiment.
+Seeds are fixed (Optuna 0, NumPy 0); runs are cache-driven and deterministic given the caches. Detector caches
+depend on the GPU backend's numerics, so a CPU re-run can differ in the last decimals of confidence scores.
+Every figure and results page is regenerated by script from `results/`.

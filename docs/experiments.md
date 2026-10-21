@@ -110,3 +110,95 @@ ByteTrack/DeepSORT's MOTA-vs-IDF1 disagreement on MOT17-04, and ONNX/INT8
 export **not** improving CPU latency despite reliably shrinking file
 size. Both are discussed in full in `docs/results.md` rather than here,
 since they're findings about the domain, not about this codebase.
+
+---
+
+# v1.0 -- the portfolio rebuild
+
+Phases 7 onward document the second iteration: a re-run of everything on a faster machine
+with more data, a real ReID network, camera-motion compensation, a corrected edge benchmark
+and three new front-ends. Same rule as above: dead ends and bugs are kept in.
+
+## Phase 7 -- re-baselining and four new evaluation tools
+
+**Moved the whole pipeline to Apple silicon and the full MOT17 training set.** Detection
+moved from CPU to the Apple GPU (about 10 ms/frame instead of 150), which made it practical
+to cover all 7 training sequences (5,330 frames) x 6 backbones, cache detections down to a
+0.1 confidence floor (ByteTrack's second stage genuinely needs the 0.1-0.4 band; the v1
+cache stopped at 0.25), and re-run every number. The old results were discarded, not mixed.
+
+**HOTA, implemented and cross-checked.** `emot/evaluation/hota.py` follows the paper;
+validated against the reference `TrackEval` implementation on a synthetic-but-realistic
+tracking scenario (real MOT17-02 ground truth, simulated misses / noise / identity swaps /
+false positives): all eight sub-metrics agree to 10 decimal places. TrackEval still calls
+`np.float`, so it only runs under NumPy 2 with a shim -- another reason to re-implement
+rather than depend on it.
+
+**Detection AP.** The v1 benchmark used downstream MOTA as its only accuracy axis, which
+conflates detector and tracker. `emot/evaluation/detection_ap.py` adds COCO-style AP50 and
+AP with ignore regions for heavily occluded people.
+
+**Tuning objective changed from MOTA to HOTA.** MOTA barely registers identity errors --
+exactly what ReID and the matching cascade fix -- so tuning for MOTA would have tuned the
+new trackers to look useless. Optuna runs are now seconds long (replay from cached
+embeddings), so each family gets 60 trials.
+
+## Phase 8 -- OSNet, from the paper
+
+DeepSORT's v1 weakness was a frozen ImageNet ResNet18. Replaced the embedding with OSNet
+(Zhou et al., ICCV 2019), written from the paper so that parameter names match the official
+`torchreid` checkpoints and the authors' MSMT17 weights load with `strict=True`.
+
+**Verification beyond "it loads":** the same crops were embedded by this implementation and
+by an independent community ONNX export of the same checkpoint -- cosine similarity 1.0000
+for all of them. And on ground-truth crops the same-person vs different-person separation
+(d') rises from 1.75 (ResNet18) to 4.30 (OSNet).
+
+**Bug 2 -- a vectorisation that must not change results.** DeepSORT's gating computed a 4x4
+inverse per (track, detection) pair. Vectorising it over detections was a pure refactor,
+so it was checked against the *old* implementation (from git) on 120 frames of randomised
+crowd data: zero mismatching frames. The matching cascade (`cascade=True`) is a new mode,
+not a change to the baseline.
+
+## Phase 9 -- BoT-SORT and camera-motion compensation
+
+Added `BotSortTracker` sharing ByteTrack's geometry and lifecycle exactly, so that
+`use_cmc=False, use_reid=False` *is* ByteTrack (a unit test asserts identical output).
+Camera motion is estimated by Lucas-Kanade flow + RANSAC similarity fit and cached per
+sequence. The estimator separates the sequences cleanly without any labels: static
+cameras measure 0.2-0.4 px/frame of global motion, moving ones 4.8-12.7 px. That
+measurement, not folklore, is what the "static"/"moving" labels in the results use.
+
+## Phase 10 -- the edge benchmark was wrong, and static INT8 scored zero
+
+**Bug 3 -- v1 compared different input shapes.** Re-measuring on the new machine, ONNX was
+*faster* than PyTorch, the opposite of v1's finding. Cause: Ultralytics' PyTorch path pads
+16:9 frames to 384x640 while v1's ONNX export used a 640x640 square (1.67x more pixels).
+The v1 benchmark was removed and replaced (`run_edge_benchmark.py`): matched shapes, one
+process per configuration, AP measured per row instead of a box-IoU proxy.
+
+**Bug 4 -- static INT8 detected nothing (AP 0.0).** First attempt at QDQ static quantisation
+produced a valid, plausible-looking model that scored exactly zero. Diagnosis: the Detect
+head's decode graph mixes pixel coordinates (up to ~640) and probabilities (0-1) in one tensor
+so one 8-bit scale flattens every score. Keeping the decode nodes in float fixed it; percentile
+calibration still scored zero in the same experiment while MinMax worked, so the final
+recipe is float decode + MinMax. (Cause of the percentile failure was not isolated.)
+
+**Finding -- INT8 and threads.** ONNX Runtime profiling shows dynamic INT8 swaps convolutions
+for the slow `ConvInteger` path, and static INT8's `QLinearConv` is slower than FP32 per core
+but scales with threads while FP32 does not. See [Edge deployment](edge.md).
+
+## Phase 11 -- parity between Python and TypeScript found a real bug
+
+The web app runs TypeScript ports of ByteTrack, the analytics tools and YOLO post-processing.
+Fixtures recorded from the Python implementation feed parity tests (`npm test`).
+**Bug 5 -- NMS silently dropped candidates.** The first parity run failed on NMS: OpenCV's
+`NMSBoxes(top_k=300)` keeps only the 300 highest-scoring candidates *before* suppression,
+whereas Ultralytics suppresses first and then caps survivors. The Python reference was wrong
+in crowded frames; fixed (`top_k=0`, cap after), fixture regenerated, port and reference now agree.
+
+## Phase 12 -- input-resolution sweep
+
+With detection this cheap, swept input size (320-1280 px long side) for yolo11 n/s/m and re-ran
+ByteTrack and BoT-SORT (CMC). Result in [Results](results.md#input-resolution-vs-tracking-quality):
+resolution moves HOTA more than model size does.

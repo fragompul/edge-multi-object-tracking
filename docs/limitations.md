@@ -1,98 +1,46 @@
-# Limitations & Future Work
+# Limitations & future work
 
-Honest accounting of what this project does *not* claim, and why -- every
-constraint below is a deliberate scope decision made explicit, not a gap
-discovered after the fact and hidden.
+What this project does **not** claim, and why. Each item is a deliberate scope decision, stated up front.
 
-## Dataset scope
+## Evaluation scope
 
-- **4 of MOT17's 7 train sequences** (`MOT17-02`, `-04`, `-11`, `-13`),
-  not the full benchmark, chosen for visual diversity (static/moving
-  camera, indoor/outdoor, day/night, dense/moderate crowding) within a
-  CPU/RAM/time budget. Results here are this project's actual
-  measurements on this subset, not a claim about "what YOLO/ByteTrack/
-  DeepSORT score on MOT17" in the official-leaderboard sense.
-- **Sourced from a community Hugging Face mirror** (`Lekim89/MOT17`), not
-  `motchallenge.net` directly -- the official host was unreachable from
-  this development environment (connection refused, verified not a
-  transient failure, not investigated further since a working public
-  mirror with the canonical directory structure was available).
-- **Test-set ground truth is not used** (MOT17's official test split
-  keeps GT private for challenge-submission integrity, standard MOT
-  protocol) -- all evaluation is on the train split's own ground truth,
-  with a temporal train/val split reserved for hyperparameter tuning.
-
-## Detection scope
-
-- **Off-the-shelf COCO-pretrained YOLO, not fine-tuned on MOT17.** The
-  benchmark's purpose is comparing backbone speed/accuracy trade-offs and
-  edge-export behavior, not producing a MOT17-specialized detector. A
-  fine-tuned detector would likely score higher on both detection and
-  downstream tracking metrics; that's a different project (detector
-  training), not this one (backbone/tracker/export benchmarking).
-- **No detection-only mAP.** The "accuracy" axis of the backbone
-  benchmark uses downstream tracking MOTA (ByteTrack, held fixed) as the
-  accuracy signal rather than a separate box-level mAP against MOT17
-  ground truth, since that would need its own IoU-matching/mAP machinery
-  in addition to what tracking evaluation already provides. Defensible
-  since tracking quality is the metric that matters end-to-end, but it
-  does mean a backbone that's slightly better at raw detection but worse
-  at whatever ByteTrack does with its output could look worse here than
-  it "really" is at detection alone.
+- **Not leaderboard numbers.** Off-the-shelf COCO YOLO (not fine-tuned on MOT17), 640 px input on 1080p footage,
+  distractor classes not filtered. Scores (HOTA ~0.4) are comparable *to each other*, not to MOTChallenge entries.
+- **MOT17 training set only (7 sequences).** The official test ground truth is private; there is no test-set claim.
+- **One tuning sequence.** Trackers are tuned on the last 25% of MOT17-02 (yolo11s). Held-out means are reported next
+  to the full means; generalisation of a single-sequence config is itself a result, but it is a small sample.
+- **Sequences are not independent samples.** Six backbones share each sequence, so "42 wins out of 42" is really
+  "7 scenes". Paired deltas are descriptive, not significance tests; with 7 scenes a bootstrap CI would be wide.
+- **Mirror, not origin.** MOT17 is downloaded from a community Hugging Face mirror (the official host was unreachable).
 
 ## Tracking scope
 
-- **DeepSORT's appearance embedding is a frozen, generic
-  ImageNet-pretrained ResNet18**, not a dedicated person re-identification
-  network trained with a metric-learning loss (triplet/contrastive) on a
-  ReID dataset like Market-1501. This is the approach used before
-  dedicated ReID nets became standard in the DeepSORT lineage, and avoids
-  an extra pretrained-weights dependency for a CPU-only project -- but it
-  is a real gap: a proper ReID embedding is specifically optimized so
-  "same identity" pairs are close and "different identity" pairs are far
-  apart, which a generic classifier's features only approximate. The gap
-  this leaves is measured directly (DeepSORT's ID-switch count vs.
-  ByteTrack's, in `docs/results.md`), not assumed away.
-- **DeepSORT association uses a single Hungarian assignment stage**, not
-  the original paper's cascaded per-track-age matching (which prioritizes
-  recently-seen tracks when resolving simultaneous ambiguous matches in
-  dense crowds). A real simplification with a real effect in the
-  heaviest-crowding sequences, not a hidden shortcut.
-- **Hyperparameter tuning is done on one representative sequence**
-  (`MOT17-02` by default), not all 4, to bound Optuna trial compute
-  (DeepSORT trials in particular re-run appearance embedding per trial).
-  The tuned config is then evaluated on the other 3 sequences too, so how
-  well a single-sequence-tuned config generalizes is itself an honestly
-  reported result, not an assumption.
+- **ReID is OSNet x0.25 trained on MSMT17** -- a small, off-the-shelf ReID network, not tuned or fine-tuned on MOT17.
+- **BoT-SORT here is "BoT-SORT-style":** it reuses this project's `[cx, cy, a, h]` Kalman state (the original uses
+  `[cx, cy, w, h]`), and applies CMC by warping state and covariance, without detection masking in the flow estimator.
+- **No learned motion or transformer trackers** (e.g. MOTR, tracking-by-attention), no OC-SORT / StrongSORT / Deep OC-SORT.
+- **Offline scoring only:** CMC and ReID features are cached, so tracker timings exclude them; live costs are in `emot track`.
 
-## Export/quantization scope
+## Edge scope
 
-- **Dynamic, not static/calibrated, INT8 quantization.** Static
-  quantization needs a representative calibration dataset run through the
-  model to collect activation ranges -- disproportionate setup for a
-  benchmark whose point is "how much latency/size do you get for free,"
-  not squeezing out the last percent of accuracy. The accuracy cost of
-  this choice is measured directly (`mean_iou_vs_reference` in the export
-  benchmark), not assumed to be zero.
-- **Detection-agreement proxy, not mAP**, for measuring how much
-  quantization changes what the model detects (mean best-match IoU
-  between the FP32 reference and each variant, per frame, averaged) --
-  same reasoning and same trade-off as the backbone-benchmark accuracy
-  metric above.
+- **One machine.** All latency/RAM numbers are from one Apple M5 laptop; ratios are hypotheses for other hardware.
+  INT8 in particular is known to behave very differently across CPUs.
+- **No power measurement** (needs elevated privileges); no thermal-throttling study.
+- **Quantisation:** static INT8 with MinMax calibration on 66 frames; no QAT, no per-layer sensitivity search.
+- **Browser inference** uses single-threaded WASM unless the host sets cross-origin isolation headers (GitHub Pages does not).
 
-## What a production system would add
+## Agent & analytics
 
-- Fine-tuned detector on real MOT17 (or a similar target-domain) training
-  data, rather than off-the-shelf COCO weights.
-- A dedicated person-ReID embedding network for DeepSORT (e.g. an
-  OSNet/BoT variant trained on Market-1501 or a similar ReID dataset).
-- Full cascaded DeepSORT matching (track-age-prioritized), not the
-  single-stage simplification used here.
-- Static, calibrated INT8 quantization (or QAT) if the measured dynamic-
-  quantization accuracy cost proves too high for the target deployment.
-- GPU-accelerated inference for real-time (>15fps) throughput on the
-  larger backbones -- this project's CPU-only latency numbers characterize
-  the actual edge-deployment target, but a GPU would change which
-  backbone size is "fast enough."
-- Multi-camera / re-identification across camera views (this project is
-  single-camera, single-video tracking only).
+- The **Claude agent has been unit-tested with a scripted client but not exercised against the live API** in CI (no
+  key available there); the tool layer it calls is covered by tests and by cross-language parity.
+- Analytics are in **pixel space**: speeds are body-heights/second (perspective-invariant), but there is no camera
+  calibration, so no metres or km/h.
+- **Track IDs are not identities.** A person who leaves and returns may get a new ID; "unique people" is an upper bound.
+
+## Future work
+
+- Fine-tune the detector on MOT17/MOT20 and re-run the ladder; add OC-SORT and a learned-motion tracker.
+- Static INT8 on x86 (VNNI) and ARM dot-product devices; a Raspberry Pi / Jetson measurement.
+- Homography-based ground-plane analytics; multi-camera association (a different, regulated problem -- see
+  [Privacy & ethics](privacy-and-ethics.md)).
+- Multi-threaded WASM via a service-worker COOP/COEP shim.

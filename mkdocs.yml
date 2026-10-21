@@ -1,0 +1,53 @@
+site_name: EMOT -- edge multi-object tracking
+site_description: Multi-object tracking from scratch, benchmarked on MOT17, deployed to the edge and the browser.
+site_url: https://fragompul.github.io/edge-multi-object-tracking/docs/
+repo_url: https://github.com/fragompul/edge-multi-object-tracking
+repo_name: fragompul/edge-multi-object-tracking
+docs_dir: docs
+theme:
+  name: material
+  logo: assets/brand/logo-mark.svg
+  favicon: assets/brand/favicon.svg
+  palette:
+    scheme: slate
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - toc.follow
+extra_css:
+  - stylesheets/emot.css
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Results: results.md
+  - Edge deployment: edge.md
+  - Understanding it:
+      - Trackers: trackers.md
+      - Architecture: architecture.md
+      - Methodology: methodology.md
+      - Analytics & agent: analytics.md
+      - Web app: web-app.md
+  - Responsible use:
+      - Privacy & ethics: privacy-and-ethics.md
+      - Limitations: limitations.md
+      - Model card: model-card.md
+      - Dataset card: dataset-card.md
+  - Project:
+      - Experiment log: experiments.md
+      - Reproducing: reproducing.md
+      - CLI reference: cli.md

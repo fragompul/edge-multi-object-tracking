@@ -1,122 +1,111 @@
 # Architecture
 
-## Component overview
+## System overview
 
 ```mermaid
-flowchart TB
-    subgraph Data
-        MOT17["MOT17 subset<br/>(4 sequences, HF mirror)"]
+flowchart LR
+    subgraph Offline["Offline: benchmark (Python)"]
+        V["MOT17 video<br/>7 sequences"] --> D["YOLO detectors<br/>6 backbones x input sizes"]
+        D --> DC[("detections.npz")]
+        V --> RE["ReID embedders<br/>ResNet18 / OSNet"] --> EC[("embeddings.npy")]
+        V --> CMC["Camera-motion estimator<br/>LK flow + RANSAC"] --> CC[("cmc.npy")]
+        DC & EC & CC --> T["Trackers<br/>ByteTrack / BoT-SORT / DeepSORT"]
+        T --> EV["Evaluation<br/>HOTA, IDF1, MOTA, AP"]
+        EV --> R[("results/*.json")]
+        D --> X["Export<br/>ONNX / INT8 / CoreML"] --> EB["Edge benchmark<br/>latency, RAM, AP"] --> R
     end
-
-    subgraph Detection
-        YOLO["YOLOv8 / YOLO11<br/>(n/s/m, COCO-pretrained)"]
-        Cache["Detection cache<br/>(cache/detections/*.npz)"]
+    subgraph Online["Online: product surfaces"]
+        CLI["emot CLI<br/>threaded pipeline"]
+        AG["Agent<br/>Claude tool use / offline planner"]
+        WEB["Web app<br/>React + ONNX Runtime Web"]
+        DASH["Plotly Dash lab"]
     end
-
-    subgraph Tracking
-        BT["ByteTrack<br/>(Kalman + two-stage IoU)"]
-        DS["DeepSORT<br/>(Kalman + Mahalanobis gate<br/>+ ResNet18 appearance)"]
-        Tune["Optuna tuning<br/>(val-split MOTA)"]
-    end
-
-    subgraph Evaluation
-        MM["py-motmetrics wrapper<br/>(MOTA/IDF1/switches)"]
-        Results["results/*.json"]
-    end
-
-    subgraph Export
-        ONNX["ONNX export"]
-        Quant["INT8 dynamic quantization"]
-        Bench["Latency/size/quality benchmark"]
-    end
-
-    subgraph Analytics
-        Traj["Trajectories"]
-        Count["Line-crossing counts"]
-        Heat["Occupancy heatmap"]
-    end
-
-    subgraph Dashboard
-        Dash["Plotly Dash<br/>(5 pages)"]
-    end
-
-    MOT17 --> YOLO --> Cache
-    Cache --> BT & DS
-    Tune -.tuned config.-> BT & DS
-    BT & DS --> MM --> Results
-    YOLO --> ONNX --> Quant --> Bench
-    Cache --> Traj --> Count & Heat
-    Results --> Dash
-    Bench --> Dash
-    Traj & Count & Heat --> Dash
-    Cache --> Dash
+    R --> DASH
+    R --> WEB
+    T -.same code.-> CLI
+    CLI --> AG
 ```
 
-## Why detections are cached separately from tracking
+## Design principles
 
-Detection (a full YOLO forward pass per frame) is the expensive step;
-tracking (Kalman prediction + Hungarian assignment) is cheap by
-comparison. The benchmark grid is `sequences x backbones x trackers`, but
-which tracker runs downstream has no effect on what the detector
-produces -- so `run_detection_cache.py` runs `sequences x backbones`
-detection passes once, and `run_tracking_benchmark.py` replays the cached
-detections through both trackers, roughly halving the total detection
-compute versus re-running YOLO once per tracker. The dashboard's
-Sequence Explorer and Analytics pages also read directly from this cache,
-so exploring the data doesn't require the detector to be loaded at all.
+1. **Cache everything that doesn't depend on the thing you're varying.** Detection is the expensive
+   step and is independent of the tracker; embeddings and camera motion are independent of the
+   association logic. Caching them turns a 294-run grid into minutes and an Optuna search into seconds.
+2. **One interface per concern.** `Detection`, `Embedder`, `OnlineTracker`, `TrackStore` are small
+   and stable, so a fake can stand in for any of them in tests.
+3. **No black boxes in the comparison.** Trackers are implemented from the primitives; the
+   only wrapped component is `py-motmetrics` for CLEAR-MOT (a standard with subtle edge cases),
+   and even there the IoU distance is local because the upstream one crashes on NumPy 2.
+4. **Two implementations are better than one when you test them against each other.** The browser
+   runs TypeScript ports verified against Python fixtures; HOTA is verified against TrackEval;
+   the ONNX detector against PyTorch; OSNet against an independent ONNX export.
 
-## Inference/evaluation sequence (one benchmark cell)
+## Replaying a tracker from caches
 
 ```mermaid
 sequenceDiagram
-    participant Runner as run_tracking_benchmark.py
-    participant Cache as Detection cache (.npz)
-    participant Tracker as ByteTrack / DeepSORT
-    participant ReID as AppearanceEmbedder (DeepSORT only)
-    participant Acc as MOTAccumulator
-    participant GT as gt.txt
-
-    Runner->>Cache: load cached detections for (sequence, backbone)
-    loop each frame
-        Runner->>Tracker: update(detections[, embeddings])
-        opt DeepSORT
-            Tracker->>ReID: embed_crops(detection crops)
-            ReID-->>Tracker: 512-d embeddings
-        end
-        Tracker-->>Runner: confirmed tracks (xyxy, track_id)
-        Runner->>GT: ground truth for this frame
-        Runner->>Acc: update(gt_boxes, predicted_tracks)
-    end
-    Runner->>Acc: compute() -> MOTA/IDF1/switches/...
-    Acc-->>Runner: SequenceMetrics
-    Runner->>Runner: write results/<seq>/<backbone>/<tracker>.json
+    participant R as replay()
+    participant C as CachedDetections
+    participant E as embeddings.npy
+    participant W as cmc.npy
+    participant T as Tracker
+    participant S as score()
+    R->>C: rows(frame) -> boxes, scores
+    R->>E: embeddings[rows]
+    R->>W: warp[frame]
+    R->>T: update(detections, embeddings, warp)
+    T-->>R: confirmed tracks
+    R->>S: tracks per frame + ground truth
+    S-->>R: HOTA, IDF1, MOTA, switches (+ switch events)
 ```
+
+## Tracker anatomy
+
+```mermaid
+flowchart TB
+    subgraph Shared
+        K["Kalman box filter<br/>[cx, cy, aspect, h] + velocities"]
+        TS["Track lifecycle<br/>tentative / confirmed / lost"]
+    end
+    BT["ByteTrack<br/>stage 1: tracks x high-conf by IoU<br/>stage 2: leftovers x low-conf by IoU"]
+    BS["BoT-SORT<br/>= ByteTrack + warp tracks by camera motion<br/>+ fused cost min(IoU, cosine/2)"]
+    DS["DeepSORT<br/>gate: Mahalanobis, cost: cosine to gallery<br/>optional matching cascade by track age"]
+    K --> BT & BS & DS
+    TS --> BT & BS & DS
+```
+
+## Edge pipeline (live)
+
+`emot track` runs three threads joined by bounded queues -- capture, detect+track, annotate/write --
+so a slow stage applies back-pressure on files and sheds the stalest frame on live sources.
+The detector is either Ultralytics (PyTorch) or `OnnxPersonDetector`: ONNX Runtime with an explicit
+execution provider, thread budget and Python-side letterbox/decode/NMS that the browser port mirrors.
+
+## Web app
+
+A static React + TypeScript site (no backend): precomputed clips/tracks/results as JSON and MP4,
+analytics and tracking computed client-side, YOLO11n via ONNX Runtime Web (WebGPU or WASM).
+Details in [Web app](web-app.md).
 
 ## Repository layout
 
-Deliberately different from this portfolio's
-`industrial-visual-anomaly-detection` (which splits into a FastAPI
-backend + a separate React frontend service): this project is a single
-Python codebase, since a Dash app *is* Python and doesn't need a separate
-API service to talk to a separate frontend build.
-
 ```
 src/emot/
-  data/         MOT17 downloader + sequence/ground-truth loader
-  detection/    YOLO wrapper + backbone specs
-  tracking/     Kalman filter, IoU, Track lifecycle, ByteTrack, DeepSORT, ReID embedder
-  evaluation/   py-motmetrics wrapper
-  export/       ONNX export, INT8 quantization, latency/size/quality benchmark
-  analytics/    trajectories, line-crossing counting, occupancy heatmap
-  training/     detection-cache runner, Optuna tuning, full benchmark grid runner
-dashboard/
-  app.py        Dash app shell (navbar + page container)
-  data_loader.py  shared read-only access to results/cache for every page
-  pages/        one module per page (overview, backbone benchmark, tracker
-                 comparison, sequence explorer, analytics)
-tests/
-  unit/         no external downloads, run in every CI job
-  integration/  real YOLO11n checkpoint, isolated into its own CI job
-notebooks/      EDA + figure generation only, no business logic
-docs/           this document, methodology, experiments, limitations, results
+  data/        MOT17 download + loader
+  detection/   Ultralytics wrapper, ONNX Runtime detector (letterbox/decode/NMS)
+  reid/        OSNet (from the paper) + embedders
+  tracking/    kalman, bytetrack, botsort, deepsort, cmc, online facade
+  evaluation/  HOTA, detection AP, CLEAR-MOT wrapper
+  benchmark/   caches, replay, aggregation
+  export/      ONNX export, INT8 quantisation, isolated edge worker
+  analytics/   trajectories, zones, dwell, loitering, crowding
+  agent/       analytics tools, Claude tool-use loop, offline planner
+  pipeline/    sources + threaded real-time pipeline
+  viz/         renderer, palette, figures
+  training/    runnable stages (detect, features, tune, bench, edge)
+  cli.py       `emot` command
+web/           React/TypeScript app (+ cross-language parity tests)
+dashboard/     Plotly Dash lab
+docs/          this site (mkdocs-material)
+scripts/       figure / GIF / data-export generators
 ```
