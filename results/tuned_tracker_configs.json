@@ -1,25 +1,51 @@
 {
   "tuned_on_sequence": "MOT17-02",
   "tuned_on_backbone": "yolo11s",
-  "n_trials": 30,
+  "objective": "HOTA on the trailing 25% of frames",
+  "n_trials": 60,
   "bytetrack": {
-    "best_mota": 0.2975916230366492,
+    "best_hota": 0.41459219283906196,
     "params": {
-      "high_conf_threshold": 0.4408720217687306,
-      "low_conf_threshold": 0.10919328753293181,
-      "match_iou_threshold": 0.6617659417803933,
-      "low_match_iou_threshold": 0.5523626587166397,
+      "high_conf_threshold": 0.4712829668967413,
+      "low_conf_threshold": 0.09754652577914091,
+      "match_iou_threshold": 0.8285798205285103,
+      "low_match_iou_threshold": 0.49291449525087416,
       "min_hits": 2,
-      "max_age": 45
+      "max_age": 59
     }
   },
   "deepsort": {
-    "best_mota": 0.2950785340314136,
+    "best_hota": 0.39073394518860305,
     "params": {
-      "max_cosine_distance": 0.4856587537883909,
-      "iou_fallback_threshold": 0.3338836761725239,
+      "max_cosine_distance": 0.5815956831027492,
+      "iou_fallback_threshold": 0.4464638998240277,
+      "min_confidence": 0.2817177504808109,
+      "min_hits": 1,
+      "max_age": 54
+    }
+  },
+  "deepsort_osnet": {
+    "best_hota": 0.404287033693666,
+    "params": {
+      "max_cosine_distance": 0.26294394485983413,
+      "iou_fallback_threshold": 0.2932906346915386,
+      "min_confidence": 0.20524817937166004,
       "min_hits": 2,
-      "max_age": 42
+      "max_age": 31
+    }
+  },
+  "botsort": {
+    "best_hota": 0.40513395885738823,
+    "params": {
+      "high_conf_threshold": 0.4712829668967413,
+      "low_conf_threshold": 0.09754652577914091,
+      "match_iou_threshold": 0.8285798205285103,
+      "low_match_iou_threshold": 0.49291449525087416,
+      "min_hits": 2,
+      "max_age": 59,
+      "proximity_threshold": 0.5744067519636624,
+      "appearance_threshold": 0.31455680991172585,
+      "ema_alpha": 0.8687737453000602
     }
   }
 }

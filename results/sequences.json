@@ -1,0 +1,86 @@
+[
+  {
+    "sequence": "MOT17-02",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 600,
+    "gt_tracks": 62,
+    "gt_boxes": 18581,
+    "mean_people_per_frame": 31.0,
+    "camera_motion_px": 0.21,
+    "camera": "static"
+  },
+  {
+    "sequence": "MOT17-04",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 1050,
+    "gt_tracks": 83,
+    "gt_boxes": 47557,
+    "mean_people_per_frame": 45.3,
+    "camera_motion_px": 0.21,
+    "camera": "static"
+  },
+  {
+    "sequence": "MOT17-05",
+    "width": 640,
+    "height": 480,
+    "fps": 14,
+    "frames": 837,
+    "gt_tracks": 133,
+    "gt_boxes": 6917,
+    "mean_people_per_frame": 8.3,
+    "camera_motion_px": 5.42,
+    "camera": "moving"
+  },
+  {
+    "sequence": "MOT17-09",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 525,
+    "gt_tracks": 26,
+    "gt_boxes": 5325,
+    "mean_people_per_frame": 10.1,
+    "camera_motion_px": 0.41,
+    "camera": "static"
+  },
+  {
+    "sequence": "MOT17-10",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 654,
+    "gt_tracks": 57,
+    "gt_boxes": 12839,
+    "mean_people_per_frame": 19.6,
+    "camera_motion_px": 4.96,
+    "camera": "moving"
+  },
+  {
+    "sequence": "MOT17-11",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 900,
+    "gt_tracks": 75,
+    "gt_boxes": 9436,
+    "mean_people_per_frame": 10.5,
+    "camera_motion_px": 4.84,
+    "camera": "moving"
+  },
+  {
+    "sequence": "MOT17-13",
+    "width": 1920,
+    "height": 1080,
+    "fps": 25,
+    "frames": 750,
+    "gt_tracks": 110,
+    "gt_boxes": 11642,
+    "mean_people_per_frame": 15.5,
+    "camera_motion_px": 12.73,
+    "camera": "moving"
+  }
+]

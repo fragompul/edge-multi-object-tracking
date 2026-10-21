@@ -1,15 +1,20 @@
 {
   "sequence": "MOT17-11",
   "backbone": "yolo11s",
+  "imgsz": 640,
   "tracker": "bytetrack",
-  "mota": 0.5134590928359475,
-  "motp": 0.16502796427451258,
-  "idf1": 0.550705252918288,
-  "num_switches": 35,
-  "num_false_positives": 1066,
-  "num_misses": 3490,
+  "mota": 0.501801610852056,
+  "motp": 0.16733154612153384,
+  "idf1": 0.5332372545487299,
+  "hota": 0.48109318504286647,
+  "deta": 0.4972326495572137,
+  "assa": 0.46846722459566176,
+  "loca": 0.8425521835919499,
+  "num_switches": 32,
+  "num_false_positives": 1225,
+  "num_misses": 3444,
   "mostly_tracked": 20,
-  "mostly_lost": 31,
+  "mostly_lost": 32,
   "num_frames": 900,
-  "eval_time_sec": 1.4381821155548096
+  "tracker_ms_per_frame": 0.20142347222038856
 }

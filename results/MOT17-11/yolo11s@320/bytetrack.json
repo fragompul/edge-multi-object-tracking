@@ -1,0 +1,20 @@
+{
+  "sequence": "MOT17-11",
+  "backbone": "yolo11s",
+  "imgsz": 320,
+  "tracker": "bytetrack",
+  "mota": 0.5193938109368377,
+  "motp": 0.16663400399020187,
+  "idf1": 0.5724853048015323,
+  "hota": 0.4861916451395575,
+  "deta": 0.46268663377366454,
+  "assa": 0.5145900663576449,
+  "loca": 0.8498955566798625,
+  "num_switches": 26,
+  "num_false_positives": 389,
+  "num_misses": 4120,
+  "mostly_tracked": 13,
+  "mostly_lost": 40,
+  "num_frames": 900,
+  "tracker_ms_per_frame": 0.15321203777906098
+}

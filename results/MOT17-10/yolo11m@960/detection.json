@@ -1,0 +1,10 @@
+{
+  "sequence": "MOT17-10",
+  "backbone": "yolo11m",
+  "imgsz": 960,
+  "ap50": 0.7200918900158462,
+  "ap": 0.35920800306215395,
+  "recall50": 0.803125,
+  "num_gt": 10560,
+  "num_detections": 13441
+}

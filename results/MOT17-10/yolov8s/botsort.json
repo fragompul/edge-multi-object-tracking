@@ -1,0 +1,20 @@
+{
+  "sequence": "MOT17-10",
+  "backbone": "yolov8s",
+  "imgsz": 640,
+  "tracker": "botsort",
+  "mota": 0.3885816652387257,
+  "motp": 0.23717293415364005,
+  "idf1": 0.4690383381852272,
+  "hota": 0.37798307391428193,
+  "deta": 0.3593159473732263,
+  "assa": 0.399379113448082,
+  "loca": 0.7914494594153182,
+  "num_switches": 47,
+  "num_false_positives": 1196,
+  "num_misses": 6607,
+  "mostly_tracked": 12,
+  "mostly_lost": 26,
+  "num_frames": 654,
+  "tracker_ms_per_frame": 0.43536659021023805
+}
