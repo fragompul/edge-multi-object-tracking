@@ -1,0 +1,1836 @@
+{
+  "rows": [
+    {
+      "id": "main/yolov8n/torch_cpu",
+      "group": "main",
+      "backbone": "yolov8n",
+      "variant": "torch_cpu",
+      "size_mb": 6.246372222900391,
+      "mean_ms": 16.613295253482647,
+      "median_ms": 16.60929149875301,
+      "p95_ms": 16.973646349651972,
+      "fps": 60.192754341759496,
+      "peak_rss_mb": 483.828125,
+      "load_s": 0.5015929590008454,
+      "ap50": 0.5543814808496396,
+      "ap": 0.3151905329507849,
+      "recall50": 0.6156957928802589,
+      "detections_per_frame": 17.686666666666667,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolov8n/torch_mps",
+      "group": "main",
+      "backbone": "yolov8n",
+      "variant": "torch_mps",
+      "size_mb": 6.246372222900391,
+      "mean_ms": 5.493351099915647,
+      "median_ms": 5.147124500581413,
+      "p95_ms": 7.364358299673767,
+      "fps": 182.03824620191406,
+      "peak_rss_mb": 613.46875,
+      "load_s": 0.7107319999995525,
+      "ap50": 0.5543814808496396,
+      "ap": 0.3151903161434044,
+      "recall50": 0.6156957928802589,
+      "detections_per_frame": 17.686666666666667,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolov8n/onnx_fp32",
+      "group": "main",
+      "backbone": "yolov8n",
+      "variant": "onnx_fp32",
+      "size_mb": 12.191646575927734,
+      "mean_ms": 10.99673668667189,
+      "median_ms": 10.773666999739362,
+      "p95_ms": 12.320048100809798,
+      "fps": 90.93606844401448,
+      "peak_rss_mb": 448.875,
+      "load_s": 0.0912167499991483,
+      "ap50": 0.5543814808496396,
+      "ap": 0.3151903161434044,
+      "recall50": 0.6156957928802589,
+      "detections_per_frame": 17.686666666666667,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8n/onnx_int8_dynamic",
+      "group": "main",
+      "backbone": "yolov8n",
+      "variant": "onnx_int8_dynamic",
+      "size_mb": 3.2776641845703125,
+      "mean_ms": 14.596843159985534,
+      "median_ms": 13.99231249888544,
+      "p95_ms": 16.58002280018991,
+      "fps": 68.5079636082759,
+      "peak_rss_mb": 403.671875,
+      "load_s": 0.12212433300010161,
+      "ap50": 0.5465052269265697,
+      "ap": 0.3057038061511249,
+      "recall50": 0.6039644012944984,
+      "detections_per_frame": 17.42,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8n/onnx_int8_static",
+      "group": "main",
+      "backbone": "yolov8n",
+      "variant": "onnx_int8_static",
+      "size_mb": 3.4392213821411133,
+      "mean_ms": 10.032983106721076,
+      "median_ms": 9.592458500264911,
+      "p95_ms": 12.644729049497982,
+      "fps": 99.67125324173045,
+      "peak_rss_mb": 394.4375,
+      "load_s": 0.09731879199898685,
+      "ap50": 0.5485383735146481,
+      "ap": 0.31121186561863745,
+      "recall50": 0.6019417475728155,
+      "detections_per_frame": 17.013333333333332,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8n/onnx_int8_static_fp32head",
+      "group": "main",
+      "backbone": "yolov8n",
+      "variant": "onnx_int8_static_fp32head",
+      "size_mb": 3.516111373901367,
+      "mean_ms": 10.192505873225551,
+      "median_ms": 9.716646000015317,
+      "p95_ms": 12.88726249949832,
+      "fps": 98.11129985481548,
+      "peak_rss_mb": 397.234375,
+      "load_s": 0.09392037499856087,
+      "ap50": 0.5547168010792043,
+      "ap": 0.3142067092627318,
+      "recall50": 0.6116504854368932,
+      "detections_per_frame": 17.533333333333335,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8n/onnx_coreml",
+      "group": "main",
+      "backbone": "yolov8n",
+      "variant": "onnx_coreml",
+      "size_mb": 12.191646575927734,
+      "mean_ms": 3.4348461199503313,
+      "median_ms": 3.4084580020135036,
+      "p95_ms": 3.5810189008770976,
+      "fps": 291.13385726125637,
+      "peak_rss_mb": 458.359375,
+      "load_s": 0.8873835419981333,
+      "ap50": 0.5552199393699502,
+      "ap": 0.3155722550579915,
+      "recall50": 0.6193365695792881,
+      "detections_per_frame": 17.92,
+      "frames": 150,
+      "active_providers": [
+        "CoreMLExecutionProvider",
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8s/torch_cpu",
+      "group": "main",
+      "backbone": "yolov8s",
+      "variant": "torch_cpu",
+      "size_mb": 21.54233169555664,
+      "mean_ms": 33.52339329348373,
+      "median_ms": 33.51131199997326,
+      "p95_ms": 33.87940609809448,
+      "fps": 29.829915821629545,
+      "peak_rss_mb": 566.28125,
+      "load_s": 0.5902076660022431,
+      "ap50": 0.634627088794395,
+      "ap": 0.3585408691973549,
+      "recall50": 0.7111650485436893,
+      "detections_per_frame": 20.30666666666667,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolov8s/torch_mps",
+      "group": "main",
+      "backbone": "yolov8s",
+      "variant": "torch_mps",
+      "size_mb": 21.54233169555664,
+      "mean_ms": 10.113773280075597,
+      "median_ms": 9.662770999057102,
+      "p95_ms": 11.192312349339767,
+      "fps": 98.87506594299742,
+      "peak_rss_mb": 661.65625,
+      "load_s": 0.695132790999196,
+      "ap50": 0.634627088794395,
+      "ap": 0.3585408691973549,
+      "recall50": 0.7111650485436893,
+      "detections_per_frame": 20.30666666666667,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolov8s/onnx_fp32",
+      "group": "main",
+      "backbone": "yolov8s",
+      "variant": "onnx_fp32",
+      "size_mb": 42.727142333984375,
+      "mean_ms": 23.379089706601615,
+      "median_ms": 23.309062498810817,
+      "p95_ms": 24.22607715088816,
+      "fps": 42.77326502227447,
+      "peak_rss_mb": 561.140625,
+      "load_s": 0.17836945800081594,
+      "ap50": 0.6346242823282436,
+      "ap": 0.3585399150684403,
+      "recall50": 0.7111650485436893,
+      "detections_per_frame": 20.313333333333333,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8s/onnx_int8_dynamic",
+      "group": "main",
+      "backbone": "yolov8s",
+      "variant": "onnx_int8_dynamic",
+      "size_mb": 10.925225257873535,
+      "mean_ms": 32.02674450655953,
+      "median_ms": 32.121020998602035,
+      "p95_ms": 33.94684755039634,
+      "fps": 31.223904127851203,
+      "peak_rss_mb": 439.921875,
+      "load_s": 0.20056291700166184,
+      "ap50": 0.628954304376022,
+      "ap": 0.35681254223130254,
+      "recall50": 0.7042880258899676,
+      "detections_per_frame": 20.18,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8s/onnx_int8_static",
+      "group": "main",
+      "backbone": "yolov8s",
+      "variant": "onnx_int8_static",
+      "size_mb": 11.145408630371094,
+      "mean_ms": 20.02440581340731,
+      "median_ms": 19.66514599916991,
+      "p95_ms": 21.933308700499765,
+      "fps": 49.93905983120116,
+      "peak_rss_mb": 413.203125,
+      "load_s": 0.1518210829999589,
+      "ap50": 0.6196989660085459,
+      "ap": 0.35133059901770064,
+      "recall50": 0.6937702265372169,
+      "detections_per_frame": 19.653333333333332,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8s/onnx_int8_static_fp32head",
+      "group": "main",
+      "backbone": "yolov8s",
+      "variant": "onnx_int8_static_fp32head",
+      "size_mb": 11.255257606506348,
+      "mean_ms": 20.295799166560755,
+      "median_ms": 19.827292000627494,
+      "p95_ms": 22.259912798472214,
+      "fps": 49.27127982462471,
+      "peak_rss_mb": 410.078125,
+      "load_s": 0.1482806670028367,
+      "ap50": 0.6189104255879722,
+      "ap": 0.3508834782780682,
+      "recall50": 0.6901294498381877,
+      "detections_per_frame": 19.293333333333333,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8s/onnx_coreml",
+      "group": "main",
+      "backbone": "yolov8s",
+      "variant": "onnx_coreml",
+      "size_mb": 42.727142333984375,
+      "mean_ms": 4.83254054003434,
+      "median_ms": 4.768354499901761,
+      "p95_ms": 5.001500000798841,
+      "fps": 206.93049374664824,
+      "peak_rss_mb": 614.015625,
+      "load_s": 1.0109374999992724,
+      "ap50": 0.635681280353476,
+      "ap": 0.3583627094847089,
+      "recall50": 0.7135922330097088,
+      "detections_per_frame": 20.506666666666668,
+      "frames": 150,
+      "active_providers": [
+        "CoreMLExecutionProvider",
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8m/torch_cpu",
+      "group": "main",
+      "backbone": "yolov8m",
+      "variant": "torch_cpu",
+      "size_mb": 49.72160720825195,
+      "mean_ms": 70.13632221993855,
+      "median_ms": 69.59025000105612,
+      "p95_ms": 71.01493110130832,
+      "fps": 14.257947499216279,
+      "peak_rss_mb": 724.296875,
+      "load_s": 0.788690207999025,
+      "ap50": 0.6325207480040437,
+      "ap": 0.3704129528271264,
+      "recall50": 0.7156148867313916,
+      "detections_per_frame": 19.506666666666668,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolov8m/torch_mps",
+      "group": "main",
+      "backbone": "yolov8m",
+      "variant": "torch_mps",
+      "size_mb": 49.72160720825195,
+      "mean_ms": 20.1730594332912,
+      "median_ms": 20.37660399946617,
+      "p95_ms": 20.62451235105982,
+      "fps": 49.571062996509085,
+      "peak_rss_mb": 774.5625,
+      "load_s": 0.7692573750027805,
+      "ap50": 0.6325207480040437,
+      "ap": 0.3704129528271264,
+      "recall50": 0.7156148867313916,
+      "detections_per_frame": 19.506666666666668,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolov8m/onnx_fp32",
+      "group": "main",
+      "backbone": "yolov8m",
+      "variant": "onnx_fp32",
+      "size_mb": 98.93641185760498,
+      "mean_ms": 51.99923610663973,
+      "median_ms": 51.97170799874584,
+      "p95_ms": 53.75532049984031,
+      "fps": 19.23105173986029,
+      "peak_rss_mb": 726.125,
+      "load_s": 0.338812207999581,
+      "ap50": 0.6325207480040437,
+      "ap": 0.3704129528271264,
+      "recall50": 0.7156148867313916,
+      "detections_per_frame": 19.506666666666668,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8m/onnx_int8_dynamic",
+      "group": "main",
+      "backbone": "yolov8m",
+      "variant": "onnx_int8_dynamic",
+      "size_mb": 25.0399808883667,
+      "mean_ms": 72.68216084009812,
+      "median_ms": 72.53454199963016,
+      "p95_ms": 75.51723954893532,
+      "fps": 13.758534259871766,
+      "peak_rss_mb": 513.484375,
+      "load_s": 0.38934462500037625,
+      "ap50": 0.6140699069024363,
+      "ap": 0.3601419178842351,
+      "recall50": 0.6836569579288025,
+      "detections_per_frame": 17.653333333333332,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8m/onnx_int8_static",
+      "group": "main",
+      "backbone": "yolov8m",
+      "variant": "onnx_int8_static",
+      "size_mb": 25.370036125183105,
+      "mean_ms": 46.56324415348839,
+      "median_ms": 46.23337500197522,
+      "p95_ms": 50.602841848558455,
+      "fps": 21.476166838883856,
+      "peak_rss_mb": 440.90625,
+      "load_s": 0.28341837499829126,
+      "ap50": 0.6291933308914089,
+      "ap": 0.37103778467339327,
+      "recall50": 0.7071197411003236,
+      "detections_per_frame": 19.12,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8m/onnx_int8_static_fp32head",
+      "group": "main",
+      "backbone": "yolov8m",
+      "variant": "onnx_int8_static_fp32head",
+      "size_mb": 25.52383041381836,
+      "mean_ms": 46.48667248652297,
+      "median_ms": 46.668103997944854,
+      "p95_ms": 48.10278519980784,
+      "fps": 21.5115418357791,
+      "peak_rss_mb": 447.375,
+      "load_s": 0.2819572080006765,
+      "ap50": 0.6280039744360573,
+      "ap": 0.37188836462345437,
+      "recall50": 0.7091423948220065,
+      "detections_per_frame": 19.226666666666667,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolov8m/onnx_coreml",
+      "group": "main",
+      "backbone": "yolov8m",
+      "variant": "onnx_coreml",
+      "size_mb": 98.93641185760498,
+      "mean_ms": 7.77368800646703,
+      "median_ms": 7.555645999673288,
+      "p95_ms": 8.66915175156464,
+      "fps": 128.63907056317248,
+      "peak_rss_mb": 955.375,
+      "load_s": 1.6182602500011853,
+      "ap50": 0.6327641295127509,
+      "ap": 0.3712501932965125,
+      "recall50": 0.7184466019417476,
+      "detections_per_frame": 19.753333333333334,
+      "frames": 150,
+      "active_providers": [
+        "CoreMLExecutionProvider",
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11n/torch_cpu",
+      "group": "main",
+      "backbone": "yolo11n",
+      "variant": "torch_cpu",
+      "size_mb": 5.353702545166016,
+      "mean_ms": 16.979488946623558,
+      "median_ms": 16.967604500678135,
+      "p95_ms": 17.349808449216653,
+      "fps": 58.894587648873504,
+      "peak_rss_mb": 470.421875,
+      "load_s": 0.5083365419995971,
+      "ap50": 0.542609961283051,
+      "ap": 0.302296495146791,
+      "recall50": 0.6035598705501618,
+      "detections_per_frame": 17.066666666666666,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolo11n/torch_mps",
+      "group": "main",
+      "backbone": "yolo11n",
+      "variant": "torch_mps",
+      "size_mb": 5.353702545166016,
+      "mean_ms": 7.4134836334754555,
+      "median_ms": 6.824686999607366,
+      "p95_ms": 11.910831400746236,
+      "fps": 134.88935154378942,
+      "peak_rss_mb": 622.25,
+      "load_s": 0.7035936249994847,
+      "ap50": 0.542609961283051,
+      "ap": 0.302296495146791,
+      "recall50": 0.6035598705501618,
+      "detections_per_frame": 17.066666666666666,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolo11n/onnx_fp32",
+      "group": "main",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "size_mb": 10.179672241210938,
+      "mean_ms": 11.19323081994177,
+      "median_ms": 10.995145999913802,
+      "p95_ms": 12.391956399551416,
+      "fps": 89.33971040947428,
+      "peak_rss_mb": 453.203125,
+      "load_s": 0.09457287500117673,
+      "ap50": 0.542609961283051,
+      "ap": 0.302296495146791,
+      "recall50": 0.6035598705501618,
+      "detections_per_frame": 17.066666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11n/onnx_int8_dynamic",
+      "group": "main",
+      "backbone": "yolo11n",
+      "variant": "onnx_int8_dynamic",
+      "size_mb": 2.8446569442749023,
+      "mean_ms": 16.543374740116025,
+      "median_ms": 16.229311999268248,
+      "p95_ms": 18.446789553308918,
+      "fps": 60.44715879977622,
+      "peak_rss_mb": 419.984375,
+      "load_s": 0.13533483300125226,
+      "ap50": 0.5396647012727905,
+      "ap": 0.29996695736695306,
+      "recall50": 0.5966828478964401,
+      "detections_per_frame": 15.84,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11n/onnx_int8_static",
+      "group": "main",
+      "backbone": "yolo11n",
+      "variant": "onnx_int8_static",
+      "size_mb": 3.0828428268432617,
+      "mean_ms": 10.812443586910376,
+      "median_ms": 10.367562497776817,
+      "p95_ms": 13.10333545152389,
+      "fps": 92.4860316691601,
+      "peak_rss_mb": 398.0625,
+      "load_s": 0.1113811249997525,
+      "ap50": 0.5288797375922786,
+      "ap": 0.29249623517704204,
+      "recall50": 0.593042071197411,
+      "detections_per_frame": 17.04,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11n/onnx_int8_static_fp32head",
+      "group": "main",
+      "backbone": "yolo11n",
+      "variant": "onnx_int8_static_fp32head",
+      "size_mb": 3.1597328186035156,
+      "mean_ms": 11.27932361322261,
+      "median_ms": 10.787770999741042,
+      "p95_ms": 13.767387799089192,
+      "fps": 88.65779848959316,
+      "peak_rss_mb": 395.859375,
+      "load_s": 0.10838258399962797,
+      "ap50": 0.5304787282152439,
+      "ap": 0.2945036300937466,
+      "recall50": 0.595873786407767,
+      "detections_per_frame": 17.153333333333332,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11n/onnx_coreml",
+      "group": "main",
+      "backbone": "yolo11n",
+      "variant": "onnx_coreml",
+      "size_mb": 10.179672241210938,
+      "mean_ms": 4.603782806613405,
+      "median_ms": 4.562270998576423,
+      "p95_ms": 4.818806249932094,
+      "fps": 217.21267966062268,
+      "peak_rss_mb": 435.3125,
+      "load_s": 0.9806773750024149,
+      "ap50": 0.5417869633215623,
+      "ap": 0.3040907065024826,
+      "recall50": 0.6063915857605178,
+      "detections_per_frame": 17.266666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CoreMLExecutionProvider",
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11s/torch_cpu",
+      "group": "main",
+      "backbone": "yolo11s",
+      "variant": "torch_cpu",
+      "size_mb": 18.419010162353516,
+      "mean_ms": 32.206483046878326,
+      "median_ms": 32.05497899762122,
+      "p95_ms": 32.90671510167157,
+      "fps": 31.04964918226074,
+      "peak_rss_mb": 557.203125,
+      "load_s": 0.5919276249987888,
+      "ap50": 0.5975473644697782,
+      "ap": 0.3426162920735357,
+      "recall50": 0.6751618122977346,
+      "detections_per_frame": 18.406666666666666,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolo11s/torch_mps",
+      "group": "main",
+      "backbone": "yolo11s",
+      "variant": "torch_mps",
+      "size_mb": 18.419010162353516,
+      "mean_ms": 10.192883600151012,
+      "median_ms": 9.71037549970788,
+      "p95_ms": 12.399006400119106,
+      "fps": 98.10766405545773,
+      "peak_rss_mb": 661.359375,
+      "load_s": 0.726361958997586,
+      "ap50": 0.5975473644697782,
+      "ap": 0.3426162920735357,
+      "recall50": 0.6751618122977346,
+      "detections_per_frame": 18.406666666666666,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolo11s/onnx_fp32",
+      "group": "main",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "size_mb": 36.22488594055176,
+      "mean_ms": 21.87396554676525,
+      "median_ms": 21.912521498961723,
+      "p95_ms": 23.387746198568493,
+      "fps": 45.716447612668084,
+      "peak_rss_mb": 562.96875,
+      "load_s": 0.16378445800000918,
+      "ap50": 0.5975473644697782,
+      "ap": 0.3426162920735357,
+      "recall50": 0.6751618122977346,
+      "detections_per_frame": 18.406666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11s/onnx_int8_dynamic",
+      "group": "main",
+      "backbone": "yolo11s",
+      "variant": "onnx_int8_dynamic",
+      "size_mb": 9.376721382141113,
+      "mean_ms": 32.65570913962923,
+      "median_ms": 32.814708501973655,
+      "p95_ms": 34.705223100900184,
+      "fps": 30.62251674658791,
+      "peak_rss_mb": 468.421875,
+      "load_s": 0.20577616700029466,
+      "ap50": 0.5984401920557778,
+      "ap": 0.33818059533902567,
+      "recall50": 0.6840614886731392,
+      "detections_per_frame": 19.953333333333333,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11s/onnx_int8_static",
+      "group": "main",
+      "backbone": "yolo11s",
+      "variant": "onnx_int8_static",
+      "size_mb": 9.703841209411621,
+      "mean_ms": 20.166042253234384,
+      "median_ms": 20.042457997988095,
+      "p95_ms": 22.176016299090403,
+      "fps": 49.588312245037194,
+      "peak_rss_mb": 416.15625,
+      "load_s": 0.15788233400235185,
+      "ap50": 0.6081935408085777,
+      "ap": 0.34625278234281565,
+      "recall50": 0.683252427184466,
+      "detections_per_frame": 18.586666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11s/onnx_int8_static_fp32head",
+      "group": "main",
+      "backbone": "yolo11s",
+      "variant": "onnx_int8_static_fp32head",
+      "size_mb": 9.813690185546875,
+      "mean_ms": 20.409993593251176,
+      "median_ms": 20.210562499414664,
+      "p95_ms": 22.60033124948677,
+      "fps": 48.995605776704544,
+      "peak_rss_mb": 414.796875,
+      "load_s": 0.15291625000099884,
+      "ap50": 0.6092052693592424,
+      "ap": 0.3454722443486003,
+      "recall50": 0.6840614886731392,
+      "detections_per_frame": 18.68,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11s/onnx_coreml",
+      "group": "main",
+      "backbone": "yolo11s",
+      "variant": "onnx_coreml",
+      "size_mb": 36.22488594055176,
+      "mean_ms": 7.101289160030622,
+      "median_ms": 7.006791500316467,
+      "p95_ms": 7.731825301198114,
+      "fps": 140.81950156718977,
+      "peak_rss_mb": 526.78125,
+      "load_s": 1.2979390830005286,
+      "ap50": 0.5990793706179106,
+      "ap": 0.3426491290516484,
+      "recall50": 0.6796116504854369,
+      "detections_per_frame": 18.653333333333332,
+      "frames": 150,
+      "active_providers": [
+        "CoreMLExecutionProvider",
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11m/torch_cpu",
+      "group": "main",
+      "backbone": "yolo11m",
+      "variant": "torch_cpu",
+      "size_mb": 38.799400329589844,
+      "mean_ms": 66.81579687993992,
+      "median_ms": 66.67406200176629,
+      "p95_ms": 67.74311439912708,
+      "fps": 14.966520593878146,
+      "peak_rss_mb": 697.265625,
+      "load_s": 0.796579041001678,
+      "ap50": 0.5920246154852987,
+      "ap": 0.3500261221295517,
+      "recall50": 0.6573624595469255,
+      "detections_per_frame": 16.24,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolo11m/torch_mps",
+      "group": "main",
+      "backbone": "yolo11m",
+      "variant": "torch_mps",
+      "size_mb": 38.799400329589844,
+      "mean_ms": 23.262599699834634,
+      "median_ms": 23.377166500722524,
+      "p95_ms": 23.703749702144705,
+      "fps": 42.98745681494526,
+      "peak_rss_mb": 756.03125,
+      "load_s": 0.803171374998783,
+      "ap50": 0.5920246154852987,
+      "ap": 0.3500261221295517,
+      "recall50": 0.6573624595469255,
+      "detections_per_frame": 16.24,
+      "frames": 150,
+      "active_providers": null
+    },
+    {
+      "id": "main/yolo11m/onnx_fp32",
+      "group": "main",
+      "backbone": "yolo11m",
+      "variant": "onnx_fp32",
+      "size_mb": 76.87225723266602,
+      "mean_ms": 55.756444726648624,
+      "median_ms": 56.34379199909745,
+      "p95_ms": 58.97042284977942,
+      "fps": 17.935146419442578,
+      "peak_rss_mb": 728.359375,
+      "load_s": 0.36314141700131586,
+      "ap50": 0.5920238639921844,
+      "ap": 0.35002584974023865,
+      "recall50": 0.6573624595469255,
+      "detections_per_frame": 16.24,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11m/onnx_int8_dynamic",
+      "group": "main",
+      "backbone": "yolo11m",
+      "variant": "onnx_int8_dynamic",
+      "size_mb": 19.619897842407227,
+      "mean_ms": 77.97577247363127,
+      "median_ms": 78.1454579991987,
+      "p95_ms": 80.30880190035532,
+      "fps": 12.824496228468474,
+      "peak_rss_mb": 573.015625,
+      "load_s": 0.4117459160006547,
+      "ap50": 0.5855742061712514,
+      "ap": 0.3420651593644683,
+      "recall50": 0.6415857605177994,
+      "detections_per_frame": 15.666666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11m/onnx_int8_static",
+      "group": "main",
+      "backbone": "yolo11m",
+      "variant": "onnx_int8_static",
+      "size_mb": 20.087791442871094,
+      "mean_ms": 48.00497276664828,
+      "median_ms": 48.56662499878439,
+      "p95_ms": 50.53825014983886,
+      "fps": 20.831175238052744,
+      "peak_rss_mb": 448.34375,
+      "load_s": 0.286350541999127,
+      "ap50": 0.5861917202521418,
+      "ap": 0.34581353109506474,
+      "recall50": 0.6480582524271845,
+      "detections_per_frame": 15.813333333333333,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11m/onnx_int8_static_fp32head",
+      "group": "main",
+      "backbone": "yolo11m",
+      "variant": "onnx_int8_static_fp32head",
+      "size_mb": 20.28552532196045,
+      "mean_ms": 48.71140253999329,
+      "median_ms": 49.2820630006463,
+      "p95_ms": 51.60884795222955,
+      "fps": 20.529074258926848,
+      "peak_rss_mb": 454.125,
+      "load_s": 0.2865458340020268,
+      "ap50": 0.5941921971793007,
+      "ap": 0.34864917813494645,
+      "recall50": 0.6553398058252428,
+      "detections_per_frame": 16.14666666666667,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "main/yolo11m/onnx_coreml",
+      "group": "main",
+      "backbone": "yolo11m",
+      "variant": "onnx_coreml",
+      "size_mb": 76.87225723266602,
+      "mean_ms": 12.645036399990204,
+      "median_ms": 12.564541499159532,
+      "p95_ms": 13.618079650041182,
+      "fps": 79.08241371300241,
+      "peak_rss_mb": 672.359375,
+      "load_s": 2.1044964579996304,
+      "ap50": 0.5910730367445164,
+      "ap": 0.34950364467416944,
+      "recall50": 0.6581715210355987,
+      "detections_per_frame": 16.34,
+      "frames": 150,
+      "active_providers": [
+        "CoreMLExecutionProvider",
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11n/onnx_fp32/1",
+      "group": "threads",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "threads": 1,
+      "size_mb": 10.179672241210938,
+      "mean_ms": 12.469531340223815,
+      "median_ms": 12.266458501471789,
+      "p95_ms": 13.341242149726895,
+      "fps": 80.19547589364743,
+      "peak_rss_mb": 444.828125,
+      "load_s": 0.10118166699976427,
+      "ap50": 0.542609961283051,
+      "ap": 0.302296495146791,
+      "recall50": 0.6035598705501618,
+      "detections_per_frame": 17.066666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11n/onnx_fp32/2",
+      "group": "threads",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "threads": 2,
+      "size_mb": 10.179672241210938,
+      "mean_ms": 11.039844493182803,
+      "median_ms": 10.855624999749125,
+      "p95_ms": 11.839668749598786,
+      "fps": 90.58098604717742,
+      "peak_rss_mb": 446.359375,
+      "load_s": 0.09013749999940046,
+      "ap50": 0.542609961283051,
+      "ap": 0.302296495146791,
+      "recall50": 0.6035598705501618,
+      "detections_per_frame": 17.066666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11n/onnx_fp32/4",
+      "group": "threads",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "threads": 4,
+      "size_mb": 10.179672241210938,
+      "mean_ms": 11.280960040118467,
+      "median_ms": 11.312938000628492,
+      "p95_ms": 11.916039801508305,
+      "fps": 88.64493770421143,
+      "peak_rss_mb": 447.671875,
+      "load_s": 0.09337600000071689,
+      "ap50": 0.542609961283051,
+      "ap": 0.302296495146791,
+      "recall50": 0.6035598705501618,
+      "detections_per_frame": 17.066666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11n/onnx_fp32/0",
+      "group": "threads",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "threads": 10,
+      "size_mb": 10.179672241210938,
+      "mean_ms": 11.3969769734346,
+      "median_ms": 11.161520500536426,
+      "p95_ms": 12.848625000333412,
+      "fps": 87.74256562340315,
+      "peak_rss_mb": 451.515625,
+      "load_s": 0.09881091699935496,
+      "ap50": 0.542609961283051,
+      "ap": 0.302296495146791,
+      "recall50": 0.6035598705501618,
+      "detections_per_frame": 17.066666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11n/onnx_int8_static/1",
+      "group": "threads",
+      "backbone": "yolo11n",
+      "variant": "onnx_int8_static",
+      "threads": 1,
+      "size_mb": 3.0828428268432617,
+      "mean_ms": 17.958147759879164,
+      "median_ms": 17.893500000354834,
+      "p95_ms": 18.51497240095341,
+      "fps": 55.68503018079236,
+      "peak_rss_mb": 393.09375,
+      "load_s": 0.1528173330007121,
+      "ap50": 0.5288797375922786,
+      "ap": 0.29249623517704204,
+      "recall50": 0.593042071197411,
+      "detections_per_frame": 17.04,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11n/onnx_int8_static/2",
+      "group": "threads",
+      "backbone": "yolo11n",
+      "variant": "onnx_int8_static",
+      "threads": 2,
+      "size_mb": 3.0828428268432617,
+      "mean_ms": 13.342669159925814,
+      "median_ms": 13.388708499405766,
+      "p95_ms": 13.721387501755089,
+      "fps": 74.94752271932673,
+      "peak_rss_mb": 392.671875,
+      "load_s": 0.11826316599763231,
+      "ap50": 0.5288797375922786,
+      "ap": 0.29249623517704204,
+      "recall50": 0.593042071197411,
+      "detections_per_frame": 17.04,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11n/onnx_int8_static/4",
+      "group": "threads",
+      "backbone": "yolo11n",
+      "variant": "onnx_int8_static",
+      "threads": 4,
+      "size_mb": 3.0828428268432617,
+      "mean_ms": 10.230158940030378,
+      "median_ms": 10.335416000089026,
+      "p95_ms": 10.65610219957307,
+      "fps": 97.75019194345289,
+      "peak_rss_mb": 393.515625,
+      "load_s": 0.11008887500065612,
+      "ap50": 0.5288797375922786,
+      "ap": 0.29249623517704204,
+      "recall50": 0.593042071197411,
+      "detections_per_frame": 17.04,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11n/onnx_int8_static/0",
+      "group": "threads",
+      "backbone": "yolo11n",
+      "variant": "onnx_int8_static",
+      "threads": 10,
+      "size_mb": 3.0828428268432617,
+      "mean_ms": 10.760490846635852,
+      "median_ms": 10.320063001927338,
+      "p95_ms": 13.152768899090006,
+      "fps": 92.93256360258314,
+      "peak_rss_mb": 394.46875,
+      "load_s": 0.11021291600263794,
+      "ap50": 0.5288797375922786,
+      "ap": 0.29249623517704204,
+      "recall50": 0.593042071197411,
+      "detections_per_frame": 17.04,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11s/onnx_fp32/1",
+      "group": "threads",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "threads": 1,
+      "size_mb": 36.22488594055176,
+      "mean_ms": 24.380430800180573,
+      "median_ms": 24.01083299992024,
+      "p95_ms": 25.948691300254723,
+      "fps": 41.016502464451676,
+      "peak_rss_mb": 545.25,
+      "load_s": 0.178828958003578,
+      "ap50": 0.5975473644697782,
+      "ap": 0.3426162920735357,
+      "recall50": 0.6751618122977346,
+      "detections_per_frame": 18.406666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11s/onnx_fp32/2",
+      "group": "threads",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "threads": 2,
+      "size_mb": 36.22488594055176,
+      "mean_ms": 22.708188326723757,
+      "median_ms": 22.156083501613466,
+      "p95_ms": 26.004052750431576,
+      "fps": 44.03697845077172,
+      "peak_rss_mb": 545.875,
+      "load_s": 0.1648765000027197,
+      "ap50": 0.5975473644697782,
+      "ap": 0.3426162920735357,
+      "recall50": 0.6751618122977346,
+      "detections_per_frame": 18.406666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11s/onnx_fp32/4",
+      "group": "threads",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "threads": 4,
+      "size_mb": 36.22488594055176,
+      "mean_ms": 23.06480387339737,
+      "median_ms": 22.858895499666687,
+      "p95_ms": 24.98179144931782,
+      "fps": 43.35610246195878,
+      "peak_rss_mb": 551.6875,
+      "load_s": 0.16795920799995656,
+      "ap50": 0.5975473644697782,
+      "ap": 0.3426162920735357,
+      "recall50": 0.6751618122977346,
+      "detections_per_frame": 18.406666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11s/onnx_fp32/0",
+      "group": "threads",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "threads": 10,
+      "size_mb": 36.22488594055176,
+      "mean_ms": 23.09672355996251,
+      "median_ms": 22.759166500691208,
+      "p95_ms": 26.00129169968568,
+      "fps": 43.296184300940006,
+      "peak_rss_mb": 561.859375,
+      "load_s": 0.1641217920005147,
+      "ap50": 0.5975473644697782,
+      "ap": 0.3426162920735357,
+      "recall50": 0.6751618122977346,
+      "detections_per_frame": 18.406666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11s/onnx_int8_static/1",
+      "group": "threads",
+      "backbone": "yolo11s",
+      "variant": "onnx_int8_static",
+      "threads": 1,
+      "size_mb": 9.703841209411621,
+      "mean_ms": 41.832225840140985,
+      "median_ms": 41.56454149961064,
+      "p95_ms": 43.75480829967273,
+      "fps": 23.905015330081458,
+      "peak_rss_mb": 411.15625,
+      "load_s": 0.27054400000270107,
+      "ap50": 0.6081935408085777,
+      "ap": 0.34625278234281565,
+      "recall50": 0.683252427184466,
+      "detections_per_frame": 18.586666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11s/onnx_int8_static/2",
+      "group": "threads",
+      "backbone": "yolo11s",
+      "variant": "onnx_int8_static",
+      "threads": 2,
+      "size_mb": 9.703841209411621,
+      "mean_ms": 27.656269719809643,
+      "median_ms": 27.687978999892948,
+      "p95_ms": 28.18340274880029,
+      "fps": 36.15816630844179,
+      "peak_rss_mb": 412.234375,
+      "load_s": 0.18930508300036308,
+      "ap50": 0.6081935408085777,
+      "ap": 0.34625278234281565,
+      "recall50": 0.683252427184466,
+      "detections_per_frame": 18.586666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11s/onnx_int8_static/4",
+      "group": "threads",
+      "backbone": "yolo11s",
+      "variant": "onnx_int8_static",
+      "threads": 4,
+      "size_mb": 9.703841209411621,
+      "mean_ms": 19.583262459830923,
+      "median_ms": 19.689083499542903,
+      "p95_ms": 20.232053650397575,
+      "fps": 51.064014591603126,
+      "peak_rss_mb": 413.15625,
+      "load_s": 0.158835291997093,
+      "ap50": 0.6081935408085777,
+      "ap": 0.34625278234281565,
+      "recall50": 0.683252427184466,
+      "detections_per_frame": 18.586666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "threads/yolo11s/onnx_int8_static/0",
+      "group": "threads",
+      "backbone": "yolo11s",
+      "variant": "onnx_int8_static",
+      "threads": 10,
+      "size_mb": 9.703841209411621,
+      "mean_ms": 19.980901906674262,
+      "median_ms": 19.52064549914212,
+      "p95_ms": 22.02367530007905,
+      "fps": 50.047790869038195,
+      "peak_rss_mb": 416.390625,
+      "load_s": 0.15566958300041733,
+      "ap50": 0.6081935408085777,
+      "ap": 0.34625278234281565,
+      "recall50": 0.683252427184466,
+      "detections_per_frame": 18.586666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11n/320",
+      "group": "resolution",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "long_side": 320,
+      "size_mb": 10.107498168945312,
+      "mean_ms": 4.0446291931827245,
+      "median_ms": 3.8451249984063907,
+      "p95_ms": 4.79988110037084,
+      "fps": 247.2414533538731,
+      "peak_rss_mb": 404.890625,
+      "load_s": 0.05865683300362434,
+      "ap50": 0.3130679510508835,
+      "ap": 0.169343853370544,
+      "recall50": 0.34506472491909385,
+      "detections_per_frame": 9.68,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11n/480",
+      "group": "resolution",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "long_side": 480,
+      "size_mb": 10.137577056884766,
+      "mean_ms": 8.151512766829304,
+      "median_ms": 8.206562501072767,
+      "p95_ms": 9.753514250405715,
+      "fps": 122.67661581409388,
+      "peak_rss_mb": 424.390625,
+      "load_s": 0.0735056670018821,
+      "ap50": 0.44910740274948435,
+      "ap": 0.25046481139729854,
+      "recall50": 0.49797734627831713,
+      "detections_per_frame": 13.38,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11n/640",
+      "group": "resolution",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "long_side": 640,
+      "size_mb": 10.179672241210938,
+      "mean_ms": 12.977780539852878,
+      "median_ms": 13.343375001568347,
+      "p95_ms": 14.755747950403018,
+      "fps": 77.0547781208925,
+      "peak_rss_mb": 451.15625,
+      "load_s": 0.09687124999982188,
+      "ap50": 0.542609961283051,
+      "ap": 0.302296495146791,
+      "recall50": 0.6035598705501618,
+      "detections_per_frame": 17.066666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11n/960",
+      "group": "resolution",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "long_side": 960,
+      "size_mb": 10.28785514831543,
+      "mean_ms": 26.148067759883514,
+      "median_ms": 26.690645501730614,
+      "p95_ms": 28.88555030131101,
+      "fps": 38.24374363654528,
+      "peak_rss_mb": 514.40625,
+      "load_s": 0.158691832999466,
+      "ap50": 0.6715816332557232,
+      "ap": 0.380503226417516,
+      "recall50": 0.7439320388349514,
+      "detections_per_frame": 22.486666666666668,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11n/1280",
+      "group": "resolution",
+      "backbone": "yolo11n",
+      "variant": "onnx_fp32",
+      "long_side": 1280,
+      "size_mb": 10.452224731445312,
+      "mean_ms": 47.87151138669287,
+      "median_ms": 48.688103999666055,
+      "p95_ms": 51.93559999934223,
+      "fps": 20.88925064266878,
+      "peak_rss_mb": 633.421875,
+      "load_s": 0.2618762090023665,
+      "ap50": 0.7183849253937864,
+      "ap": 0.41506133603724304,
+      "recall50": 0.7912621359223301,
+      "detections_per_frame": 26.84,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11s/320",
+      "group": "resolution",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "long_side": 320,
+      "size_mb": 36.15271186828613,
+      "mean_ms": 7.259722499778339,
+      "median_ms": 7.195312500698492,
+      "p95_ms": 8.197745350480545,
+      "fps": 137.74631193279538,
+      "peak_rss_mb": 467.890625,
+      "load_s": 0.08495937500265427,
+      "ap50": 0.40141491236913746,
+      "ap": 0.2254357654985907,
+      "recall50": 0.44093851132686085,
+      "detections_per_frame": 11.806666666666667,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11s/480",
+      "group": "resolution",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "long_side": 480,
+      "size_mb": 36.182790756225586,
+      "mean_ms": 14.92861718654846,
+      "median_ms": 15.0926670012268,
+      "p95_ms": 16.629533000195806,
+      "fps": 66.98544061408832,
+      "peak_rss_mb": 507.015625,
+      "load_s": 0.1248147499973129,
+      "ap50": 0.50671241112381,
+      "ap": 0.2902363852064808,
+      "recall50": 0.56957928802589,
+      "detections_per_frame": 15.28,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11s/640",
+      "group": "resolution",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "long_side": 640,
+      "size_mb": 36.22488594055176,
+      "mean_ms": 25.27961196688314,
+      "median_ms": 25.74306200040155,
+      "p95_ms": 27.464837500519934,
+      "fps": 39.55756921071504,
+      "peak_rss_mb": 561.78125,
+      "load_s": 0.16464616600205773,
+      "ap50": 0.5975473644697782,
+      "ap": 0.3426162920735357,
+      "recall50": 0.6751618122977346,
+      "detections_per_frame": 18.406666666666666,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11s/960",
+      "group": "resolution",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "long_side": 960,
+      "size_mb": 36.33306884765625,
+      "mean_ms": 55.515100833339,
+      "median_ms": 56.06218750108383,
+      "p95_ms": 58.15638994990877,
+      "fps": 18.013116881514527,
+      "peak_rss_mb": 680.828125,
+      "load_s": 0.3023213749984279,
+      "ap50": 0.6831929369159182,
+      "ap": 0.394275802999681,
+      "recall50": 0.7682038834951457,
+      "detections_per_frame": 21.893333333333334,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11s/1280",
+      "group": "resolution",
+      "backbone": "yolo11s",
+      "variant": "onnx_fp32",
+      "long_side": 1280,
+      "size_mb": 36.49743843078613,
+      "mean_ms": 99.051604173704,
+      "median_ms": 98.77481200055627,
+      "p95_ms": 106.31937850248505,
+      "fps": 10.095747649339714,
+      "peak_rss_mb": 881.390625,
+      "load_s": 0.49062625000078697,
+      "ap50": 0.7263244265752583,
+      "ap": 0.4265082860252303,
+      "recall50": 0.8066343042071198,
+      "detections_per_frame": 25.54,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11m/320",
+      "group": "resolution",
+      "backbone": "yolo11m",
+      "variant": "onnx_fp32",
+      "long_side": 320,
+      "size_mb": 76.80005073547363,
+      "mean_ms": 17.390591979856254,
+      "median_ms": 17.74043749901466,
+      "p95_ms": 18.57138965078775,
+      "fps": 57.502355363078664,
+      "peak_rss_mb": 566.65625,
+      "load_s": 0.1683229170012055,
+      "ap50": 0.40356640065621024,
+      "ap": 0.23401428851391354,
+      "recall50": 0.43163430420711973,
+      "detections_per_frame": 9.38,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11m/480",
+      "group": "resolution",
+      "backbone": "yolo11m",
+      "variant": "onnx_fp32",
+      "long_side": 480,
+      "size_mb": 76.83012962341309,
+      "mean_ms": 35.64710921321724,
+      "median_ms": 36.20706249967043,
+      "p95_ms": 37.26939405041776,
+      "fps": 28.052765625921214,
+      "peak_rss_mb": 629.890625,
+      "load_s": 0.253823500002909,
+      "ap50": 0.4915039281031823,
+      "ap": 0.29217144458633915,
+      "recall50": 0.5331715210355987,
+      "detections_per_frame": 12.513333333333334,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11m/640",
+      "group": "resolution",
+      "backbone": "yolo11m",
+      "variant": "onnx_fp32",
+      "long_side": 640,
+      "size_mb": 76.87225723266602,
+      "mean_ms": 63.67620584673811,
+      "median_ms": 61.848541499784915,
+      "p95_ms": 77.90164825073589,
+      "fps": 15.70445328364718,
+      "peak_rss_mb": 724.0625,
+      "load_s": 0.3590608750018873,
+      "ap50": 0.5920238639921844,
+      "ap": 0.35002584974023865,
+      "recall50": 0.6573624595469255,
+      "detections_per_frame": 16.24,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11m/960",
+      "group": "resolution",
+      "backbone": "yolo11m",
+      "variant": "onnx_fp32",
+      "long_side": 960,
+      "size_mb": 76.98047256469727,
+      "mean_ms": 135.45982332007648,
+      "median_ms": 135.41160399836372,
+      "p95_ms": 139.11833970032603,
+      "fps": 7.382262692290033,
+      "peak_rss_mb": 950.125,
+      "load_s": 0.6882700419992034,
+      "ap50": 0.6792140657463138,
+      "ap": 0.40282567060972496,
+      "recall50": 0.7548543689320388,
+      "detections_per_frame": 20.166666666666668,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    {
+      "id": "resolution/yolo11m/1280",
+      "group": "resolution",
+      "backbone": "yolo11m",
+      "variant": "onnx_fp32",
+      "long_side": 1280,
+      "size_mb": 77.14490699768066,
+      "mean_ms": 240.12162443332878,
+      "median_ms": 239.81937500138883,
+      "p95_ms": 245.3115312491718,
+      "fps": 4.16455620088334,
+      "peak_rss_mb": 1312.0625,
+      "load_s": 1.2237612079989049,
+      "ap50": 0.7339759579335884,
+      "ap": 0.43816696718307035,
+      "recall50": 0.816747572815534,
+      "detections_per_frame": 23.44,
+      "frames": 150,
+      "active_providers": [
+        "CPUExecutionProvider"
+      ]
+    }
+  ],
+  "machine": {
+    "cpu": "Apple M5",
+    "cores": 10,
+    "os": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.12.14",
+    "torch": "2.14.1",
+    "onnxruntime": "1.31.0",
+    "ort_providers": [
+      "CoreMLExecutionProvider",
+      "AzureExecutionProvider",
+      "CPUExecutionProvider"
+    ]
+  },
+  "protocol": {
+    "eval_frames": 150,
+    "eval_sequences": [
+      "MOT17-02",
+      "MOT17-04",
+      "MOT17-09",
+      "MOT17-10",
+      "MOT17-11",
+      "MOT17-13"
+    ],
+    "calibration_frames": 66,
+    "warmup_frames": 5,
+    "conf_floor": 0.1,
+    "input": "16:9 rectangular, stride-32 padded"
+  },
+  "profile": {
+    "backbone": "yolo11s",
+    "frames": 20,
+    "variants": {
+      "fp32/1": [
+        {
+          "op": "NhwcFusedConv",
+          "ms": 7.4842499999999985,
+          "share": 0.30696366719917306
+        },
+        {
+          "op": "QuickGelu",
+          "ms": 6.005499999999997,
+          "share": 0.2463132983752057
+        },
+        {
+          "op": "Conv",
+          "ms": 5.871200000000008,
+          "share": 0.24080503495470992
+        },
+        {
+          "op": "Transpose",
+          "ms": 2.522599999999999,
+          "share": 0.10346347955728814
+        },
+        {
+          "op": "Softmax",
+          "ms": 0.7298000000000002,
+          "share": 0.02993246942872788
+        },
+        {
+          "op": "Concat",
+          "ms": 0.7229499999999989,
+          "share": 0.029651519284048754
+        },
+        {
+          "op": "Split",
+          "ms": 0.1957999999999999,
+          "share": 0.008030662529658691
+        },
+        {
+          "op": "FusedMatMul",
+          "ms": 0.16924999999999993,
+          "share": 0.006941724377654411
+        }
+      ],
+      "int8_dynamic/1": [
+        {
+          "op": "ConvInteger",
+          "ms": 37.693500000000014,
+          "share": 0.7000872009606031
+        },
+        {
+          "op": "QuickGelu",
+          "ms": 5.944350000000005,
+          "share": 0.11040533123828147
+        },
+        {
+          "op": "DynamicQuantizeLinear",
+          "ms": 3.6712500000000157,
+          "share": 0.06818669363488727
+        },
+        {
+          "op": "Add",
+          "ms": 1.736999999999999,
+          "share": 0.03226156945013242
+        },
+        {
+          "op": "Mul",
+          "ms": 1.4552000000000354,
+          "share": 0.02702765449846509
+        },
+        {
+          "op": "Cast",
+          "ms": 1.218849999999993,
+          "share": 0.02263788942100961
+        },
+        {
+          "op": "Softmax",
+          "ms": 0.7381500000000001,
+          "share": 0.013709774029715176
+        },
+        {
+          "op": "Concat",
+          "ms": 0.6612999999999994,
+          "share": 0.012282427102690018
+        }
+      ],
+      "int8_static/1": [
+        {
+          "op": "QLinearConv",
+          "ms": 31.274649999999912,
+          "share": 0.7644426899884378
+        },
+        {
+          "op": "QLinearSigmoid",
+          "ms": 3.330400000000026,
+          "share": 0.08140458597418421
+        },
+        {
+          "op": "QLinearMul",
+          "ms": 2.280499999999991,
+          "share": 0.05574200045463756
+        },
+        {
+          "op": "QLinearConcat",
+          "ms": 1.0950499999999974,
+          "share": 0.026766181801293996
+        },
+        {
+          "op": "Resize",
+          "ms": 0.7216499999999998,
+          "share": 0.017639208343823435
+        },
+        {
+          "op": "Softmax",
+          "ms": 0.6428,
+          "share": 0.015711886819662867
+        },
+        {
+          "op": "QLinearSoftmax",
+          "ms": 0.33654999999999996,
+          "share": 0.008226253125634003
+        },
+        {
+          "op": "QLinearAdd",
+          "ms": 0.30494999999999906,
+          "share": 0.0074538579428378585
+        }
+      ],
+      "fp32/all": [
+        {
+          "op": "NhwcFusedConv",
+          "ms": 8.02945,
+          "share": 0.37190855888299335
+        },
+        {
+          "op": "Conv",
+          "ms": 6.044250000000003,
+          "share": 0.27995794320016104
+        },
+        {
+          "op": "QuickGelu",
+          "ms": 2.5626000000000166,
+          "share": 0.11869466439090658
+        },
+        {
+          "op": "Transpose",
+          "ms": 2.1434000000000015,
+          "share": 0.09927813301157717
+        },
+        {
+          "op": "Softmax",
+          "ms": 0.92785,
+          "share": 0.042976213359518435
+        },
+        {
+          "op": "Concat",
+          "ms": 0.7183999999999986,
+          "share": 0.0332748953790785
+        },
+        {
+          "op": "FusedMatMul",
+          "ms": 0.3244499999999998,
+          "share": 0.015027895052536239
+        },
+        {
+          "op": "Split",
+          "ms": 0.22824999999999968,
+          "share": 0.010572097536573873
+        }
+      ],
+      "int8_dynamic/all": [
+        {
+          "op": "ConvInteger",
+          "ms": 18.594750000000012,
+          "share": 0.6071289223520802
+        },
+        {
+          "op": "QuickGelu",
+          "ms": 2.4489000000000067,
+          "share": 0.07995794608413732
+        },
+        {
+          "op": "DynamicQuantizeLinear",
+          "ms": 2.206099999999996,
+          "share": 0.0720303911373329
+        },
+        {
+          "op": "Cast",
+          "ms": 2.1626000000000127,
+          "share": 0.07061009196029071
+        },
+        {
+          "op": "Mul",
+          "ms": 1.6713500000000086,
+          "share": 0.05457050642644584
+        },
+        {
+          "op": "Add",
+          "ms": 1.530100000000014,
+          "share": 0.04995861542053138
+        },
+        {
+          "op": "Softmax",
+          "ms": 0.73925,
+          "share": 0.024136923370778038
+        },
+        {
+          "op": "Concat",
+          "ms": 0.6472499999999985,
+          "share": 0.021133072237722088
+        }
+      ],
+      "int8_static/all": [
+        {
+          "op": "QLinearConv",
+          "ms": 9.7119,
+          "share": 0.54070350080171
+        },
+        {
+          "op": "QLinearSigmoid",
+          "ms": 2.1521500000000175,
+          "share": 0.11981950383039465
+        },
+        {
+          "op": "QLinearConcat",
+          "ms": 1.5888999999999984,
+          "share": 0.08846093889185805
+        },
+        {
+          "op": "QLinearMul",
+          "ms": 1.4841499999999948,
+          "share": 0.08262905309103832
+        },
+        {
+          "op": "Resize",
+          "ms": 1.0205999999999997,
+          "share": 0.05682121859967927
+        },
+        {
+          "op": "Softmax",
+          "ms": 0.7018500000000001,
+          "share": 0.03907502672367716
+        },
+        {
+          "op": "Transpose",
+          "ms": 0.31209999999999943,
+          "share": 0.01737595759843217
+        },
+        {
+          "op": "QLinearAdd",
+          "ms": 0.2667499999999994,
+          "share": 0.014851126848387628
+        }
+      ]
+    }
+  }
+}
