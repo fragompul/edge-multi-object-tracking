@@ -1,0 +1,22 @@
+# docker compose run --rm emot track /data/clip.mp4 --tracker botsort --save /app/outputs/out.mp4
+# docker compose up dashboard   ->  http://localhost:8050
+services:
+  emot:
+    build: .
+    image: emot
+    volumes:
+      - ./weights:/app/weights
+      - ./data:/data:ro
+      - ./outputs:/app/outputs
+
+  dashboard:
+    build: .
+    image: emot
+    entrypoint: ["python", "dashboard/app.py"]
+    environment:
+      DASH_HOST: "0.0.0.0"
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./cache:/app/cache:ro
+      - ./data:/app/data:ro

@@ -6,65 +6,112 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint-and-unit-tests:
+  python:
+    name: Python ${{ matrix.python }} -- lint, types, unit tests
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
+          cache: pip
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,dashboard]"
-      - name: Lint with ruff
-        run: ruff check src tests dashboard
-      - name: Type-check with mypy
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev,dashboard,agent]"
+      - name: Lint (ruff)
+        run: ruff check src tests dashboard scripts
+      - name: Type-check (mypy)
         run: mypy src dashboard
-      - name: Run unit tests
-        run: pytest tests/unit --cov=emot --cov-report=term-missing
+      - name: Unit tests
+        run: pytest tests/unit --cov=emot --cov-report=term-missing --cov-report=xml
+      - name: Upload coverage
+        if: matrix.python == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
 
   integration:
+    name: Integration -- real YOLO11n checkpoint, ONNX parity
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
       - name: Install
         run: |
           python -m pip install --upgrade pip
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
           pip install -e ".[dev]"
-      - name: Run integration tests (real YOLO11n checkpoint)
+      - name: Integration tests
         run: pytest tests/integration -v
 
+  web:
+    name: Web app -- typecheck, parity tests, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Cross-language parity tests (TS ports vs Python fixtures)
+        run: npm test
+      - run: npm run build
+
   dashboard-smoke:
+    name: Dashboard smoke test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
       - name: Install
         run: |
           python -m pip install --upgrade pip
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
           pip install -e ".[dashboard]"
-      - name: Start dashboard and verify every page loads (empty-results state)
+      - name: Start the dashboard and load every page
         run: |
           python dashboard/app.py &
           APP_PID=$!
-          for i in $(seq 1 20); do
-            curl -sf http://127.0.0.1:8050/ > /dev/null && break
-            sleep 1
-          done
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8050/ > /dev/null && break; sleep 1; done
           for path in "/" "/backbone-benchmark" "/tracker-comparison" "/sequence-explorer" "/analytics"; do
             code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8050$path")
             echo "$path -> $code"
-            if [ "$code" != "200" ]; then
-              echo "FAILED: $path returned $code"
-              kill $APP_PID
-              exit 1
-            fi
+            if [ "$code" != "200" ]; then kill $APP_PID; exit 1; fi
           done
           kill $APP_PID
+
+  docs:
+    name: Docs build (strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install "mkdocs-material>=9.5,<10" "mkdocs<2"
+      - run: mkdocs build --strict

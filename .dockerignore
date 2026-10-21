@@ -1,0 +1,14 @@
+.git
+.venv
+data
+cache
+weights
+exports
+outputs
+web/node_modules
+web/dist
+site
+**/__pycache__
+.mypy_cache
+.ruff_cache
+.pytest_cache
