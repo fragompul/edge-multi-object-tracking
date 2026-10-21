@@ -41,7 +41,7 @@ Demo = "https://fragompul.github.io/edge-multi-object-tracking/"
 [project.optional-dependencies]
 dashboard = [
     "dash>=2.17",
-    "dash-bootstrap-components>=1.6",
+    "dash-bootstrap-components>=2.0.4",
     "plotly>=5.22",
 ]
 agent = [
