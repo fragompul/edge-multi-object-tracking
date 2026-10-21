@@ -17,6 +17,6 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           awk -v v="$VERSION" '$0 ~ "^## \\[" v "\\]" {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > release-notes.md
           test -s release-notes.md || echo "See CHANGELOG.md" > release-notes.md
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           body_path: release-notes.md
