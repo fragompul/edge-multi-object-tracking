@@ -11,12 +11,23 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 
 COCO_PERSON_CLASS_ID = 0
+WEIGHTS_DIR = Path(__file__).resolve().parents[3] / "weights"
+
+
+def resolve_weights(name: str) -> str:
+    """Bare checkpoint names (`yolo11n.pt`) live in the repo's `weights/` folder
+    (auto-downloaded there on first use); explicit paths are used as given."""
+    if Path(name).parent != Path("."):
+        return name
+    WEIGHTS_DIR.mkdir(exist_ok=True)
+    return str(WEIGHTS_DIR / name)
 
 
 @dataclass(frozen=True)
@@ -50,10 +61,17 @@ class PersonDetector:
     """Wraps a single Ultralytics YOLO checkpoint, filtered to the COCO
     `person` class (id 0) since MOT17 is a pedestrian-tracking benchmark."""
 
-    def __init__(self, weights: str, confidence_threshold: float = 0.25, device: str = "cpu"):
-        self.model = YOLO(weights)
+    def __init__(
+        self,
+        weights: str,
+        confidence_threshold: float = 0.25,
+        device: str = "cpu",
+        imgsz: int = 640,
+    ):
+        self.model = YOLO(resolve_weights(weights))
         self.confidence_threshold = confidence_threshold
         self.device = device
+        self.imgsz = imgsz
 
     def detect(self, image: np.ndarray) -> tuple[list[Detection], float]:
         """`image` is a BGR array (as read by OpenCV). Returns detections
@@ -66,6 +84,7 @@ class PersonDetector:
                 classes=[COCO_PERSON_CLASS_ID],
                 conf=self.confidence_threshold,
                 device=self.device,
+                imgsz=self.imgsz,
                 verbose=False,
             )
         )
