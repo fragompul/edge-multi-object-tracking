@@ -121,3 +121,46 @@ class KalmanBoxTracker:
         projected_cov = self._H @ self.covariance @ self._H.T + obs_cov
         diff = measurement - projected_mean
         return float(diff.T @ np.linalg.inv(projected_cov) @ diff)
+
+    def apply_affine(self, warp: np.ndarray) -> None:
+        """Re-expresses this track in the current frame's coordinates after a
+        camera move (camera-motion compensation, BoT-SORT).
+
+        `warp` is the 2x3 similarity transform mapping the previous frame's
+        pixel coordinates onto the current frame's. The box centre and its
+        velocity rotate/scale with the image; the box height scales by the
+        transform's isotropic scale; the position/velocity covariance blocks
+        are rotated accordingly so the filter's uncertainty stays consistent.
+        """
+        linear, shift = warp[:, :2], warp[:, 2]
+        scale = float(np.sqrt(abs(np.linalg.det(linear))))
+        self.mean[:2] = linear @ self.mean[:2] + shift
+        self.mean[4:6] = linear @ self.mean[4:6]
+        self.mean[3] *= scale
+        self.mean[7] *= scale
+        block = np.eye(8)
+        block[:2, :2] = linear
+        block[4:6, 4:6] = linear
+        self.covariance = block @ self.covariance @ block.T
+
+
+def mahalanobis_matrix(trackers: list[KalmanBoxTracker], boxes_xyxy: np.ndarray) -> np.ndarray:
+    """Squared Mahalanobis distances `(n_tracks, n_boxes)`, vectorised over
+    detections (one 4x4 inverse per track instead of one per track-detection
+    pair). Numerically identical to calling `mahalanobis_gate` pairwise."""
+    out = np.zeros((len(trackers), len(boxes_xyxy)))
+    if len(trackers) == 0 or len(boxes_xyxy) == 0:
+        return out
+    measurements = np.array([xyxy_to_state(b) for b in boxes_xyxy])
+    for i, trk in enumerate(trackers):
+        height = trk.mean[3]
+        obs_std = [
+            STD_WEIGHT_POSITION * height,
+            STD_WEIGHT_POSITION * height,
+            1e-1,
+            STD_WEIGHT_POSITION * height,
+        ]
+        projected_cov = trk._H @ trk.covariance @ trk._H.T + np.diag(np.square(obs_std))
+        diff = measurements - trk._H @ trk.mean
+        out[i] = np.einsum("ij,jk,ik->i", diff, np.linalg.inv(projected_cov), diff)
+    return out
