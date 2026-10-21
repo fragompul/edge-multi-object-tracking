@@ -21,6 +21,10 @@ FrameTracks = dict[int, np.ndarray]  # track_id -> xyxy
 class TrackHistory:
     frame_indices: list[int] = field(default_factory=list)
     centers: list[tuple[float, float]] = field(default_factory=list)
+    # bottom-centre of the box: where the person touches the ground, which is the right
+    # point for "is this person standing in that zone" (a head can overhang a zone edge)
+    foot_points: list[tuple[float, float]] = field(default_factory=list)
+    heights: list[float] = field(default_factory=list)
 
     def as_array(self) -> np.ndarray:
         return np.array(self.centers)
@@ -34,6 +38,8 @@ def build_trajectories(frames: dict[int, FrameTracks]) -> dict[int, TrackHistory
             cy = float((xyxy[1] + xyxy[3]) / 2)
             trajectories[track_id].frame_indices.append(frame_idx)
             trajectories[track_id].centers.append((cx, cy))
+            trajectories[track_id].foot_points.append((cx, float(xyxy[3])))
+            trajectories[track_id].heights.append(float(xyxy[3] - xyxy[1]))
     return dict(trajectories)
 
 
