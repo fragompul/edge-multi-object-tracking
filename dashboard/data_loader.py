@@ -1,9 +1,6 @@
-"""Shared read-only data access for every dashboard page: loads the
-benchmark JSON results, cached detections, and MOT17 sequence metadata
-straight from disk. Kept separate from the page modules so every page
-reads results the same way, and so this logic is testable without
-importing Dash at all.
-"""
+"""Shared read-only data access for every dashboard page: benchmark results, caches and MOT17
+sequences straight from disk. Kept separate from the pages so every page reads results the same
+way, and so this logic is testable without importing Dash."""
 
 from __future__ import annotations
 
@@ -14,95 +11,74 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from emot.benchmark import aggregate
+from emot.benchmark.caches import CachedDetections, detection_path
+from emot.benchmark.replay import VARIANTS, FrameTracks, load_tuned, replay, sequence_frames
 from emot.data.mot17 import load_ground_truth, load_seqinfo
 
 
 @lru_cache(maxsize=1)
 def load_tracking_results(results_dir: Path) -> pd.DataFrame:
-    """Flattens every `results/<sequence>/<backbone>/<tracker>.json` into
-    one DataFrame -- the shape every comparison page needs."""
-    rows = []
-    for sequence_dir in sorted(results_dir.glob("*")):
-        if not sequence_dir.is_dir():
-            continue
-        for backbone_dir in sorted(sequence_dir.glob("*")):
-            if not backbone_dir.is_dir():
-                continue
-            for result_file in sorted(backbone_dir.glob("*.json")):
-                rows.append(json.loads(result_file.read_text()))
-    if not rows:
-        return pd.DataFrame(
-            columns=[
-                "sequence",
-                "backbone",
-                "tracker",
-                "mota",
-                "motp",
-                "idf1",
-                "num_switches",
-                "num_false_positives",
-                "num_misses",
-                "mostly_tracked",
-                "mostly_lost",
-                "num_frames",
-                "eval_time_sec",
-            ]
-        )
-    return pd.DataFrame(rows)
+    """One row per (sequence, backbone, tracker) of the main 640 px grid, with a `label` column."""
+    return aggregate.load_tracking_results(results_dir)
+
+
+@lru_cache(maxsize=1)
+def load_detection_results(results_dir: Path) -> pd.DataFrame:
+    return aggregate.load_detection_results(results_dir)
+
+
+@lru_cache(maxsize=1)
+def load_sequence_table(results_dir: Path) -> pd.DataFrame:
+    return aggregate.sequence_table(results_dir)
+
+
+@lru_cache(maxsize=1)
+def load_edge_rows(results_dir: Path) -> pd.DataFrame:
+    return pd.DataFrame(aggregate.load_edge_benchmark(results_dir)["rows"])
 
 
 @lru_cache(maxsize=1)
 def load_detection_summary(cache_dir: Path) -> dict:
     summary_path = cache_dir / "summary.json"
-    if not summary_path.exists():
-        return {}
-    return json.loads(summary_path.read_text())
-
-
-@lru_cache(maxsize=1)
-def load_export_benchmark(results_dir: Path) -> pd.DataFrame:
-    path = results_dir / "export_benchmark.json"
-    if not path.exists():
-        return pd.DataFrame(
-            columns=[
-                "backbone",
-                "variant",
-                "file_size_mb",
-                "mean_latency_ms",
-                "p95_latency_ms",
-                "mean_detections_per_frame",
-                "mean_iou_vs_reference",
-            ]
-        )
-    return pd.DataFrame(json.loads(path.read_text()))
+    return json.loads(summary_path.read_text()) if summary_path.exists() else {}
 
 
 def available_sequences(data_root: Path) -> list[str]:
     return sorted(d.name for d in data_root.glob("MOT17-*") if d.is_dir())
 
 
+@lru_cache(maxsize=16)
+def tracks_for(
+    sequence: str,
+    backbone: str,
+    tracker: str,
+    data_root: Path = Path("data/mot17"),
+    cache_root: Path = Path("cache"),
+) -> FrameTracks:
+    """Replays a tracker variant over the cached detections of a sequence (seconds, no GPU)."""
+    info = load_seqinfo(data_root / sequence)
+    return replay(
+        VARIANTS[tracker],
+        sequence,
+        backbone,
+        sequence_frames(info),
+        load_tuned(),
+        cache_root=cache_root,
+    )
+
+
 def load_frame_detections(
     cache_dir: Path, sequence: str, backbone: str, frame_idx: int
 ) -> np.ndarray:
-    """Returns an `(N, 5)` array of `[x1, y1, x2, y2, confidence]` for one
-    cached frame -- used by the sequence explorer page to draw boxes
-    without re-running the detector."""
-    npz_path = cache_dir / sequence / f"{backbone}.npz"
-    if not npz_path.exists():
+    """`(N, 5)` array of `[x1, y1, x2, y2, confidence]` for one cached frame."""
+    path = detection_path(sequence, backbone, root=cache_dir.parent)
+    if not path.exists():
         return np.zeros((0, 5))
-    data = np.load(npz_path)
-    mask = data["frame_id"] == frame_idx
-    if not mask.any():
-        return np.zeros((0, 5))
-    return np.stack(
-        [
-            data["x1"][mask],
-            data["y1"][mask],
-            data["x2"][mask],
-            data["y2"][mask],
-            data["conf"][mask],
-        ],
-        axis=1,
+    cached = CachedDetections(path)
+    rows = cached.rows(frame_idx)
+    return (
+        np.column_stack([cached.boxes[rows], cached.conf[rows]]) if len(rows) else np.zeros((0, 5))
     )
 
 

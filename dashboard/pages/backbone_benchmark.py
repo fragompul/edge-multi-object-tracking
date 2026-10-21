@@ -1,15 +1,4 @@
-"""Speed-vs-accuracy backbone comparison.
-
-"Accuracy" here is each backbone's mean tracking MOTA (averaged across
-sequences, ByteTrack only, to hold the tracker fixed while varying the
-backbone) rather than a separate detection-only mAP: this project doesn't
-compute per-backbone detection mAP against MOT17's box-level ground truth
-independently of tracking (that would need its own IoU-matching/mAP
-machinery on top of what tracking evaluation already provides), so
-tracking MOTA is used as the accuracy signal instead -- documented in
-docs/limitations.md as a deliberate scope trade-off, and a defensible one
-since tracking quality is the metric that actually matters end-to-end.
-"""
+"""Detector backbones: AP50 and downstream HOTA against *measured* CPU latency (edge benchmark)."""
 
 from __future__ import annotations
 
@@ -19,89 +8,103 @@ import dash
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from dash import dcc, html
-from data_loader import load_detection_summary, load_export_benchmark, load_tracking_results
+from data_loader import load_detection_results, load_edge_rows, load_tracking_results
+from theme import TEMPLATE, empty
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 RESULTS_DIR = REPO_ROOT / "results"
-CACHE_DIR = REPO_ROOT / "cache" / "detections"
 
 dash.register_page(__name__, path="/backbone-benchmark", name="Backbone Benchmark")
 
-BACKBONE_COLORS = {
-    "yolov8n": "#7f8fa6",
-    "yolov8s": "#535c68",
-    "yolov8m": "#2f3640",
-    "yolo11n": "#00a8ff",
-    "yolo11s": "#0097e6",
-    "yolo11m": "#0652DD",
+RUNTIMES = {
+    "torch_cpu": "PyTorch CPU",
+    "torch_mps": "PyTorch GPU",
+    "onnx_fp32": "ONNX CPU",
+    "onnx_int8_dynamic": "INT8 dynamic",
+    "onnx_int8_static": "INT8 static",
+    "onnx_coreml": "CoreML",
 }
 
 
-def _speed_accuracy_figure() -> go.Figure:
-    results = load_tracking_results(RESULTS_DIR)
-    detection_summary = load_detection_summary(CACHE_DIR)
-
+def _scatter() -> go.Figure:
+    det, trk, edge = (
+        load_detection_results(RESULTS_DIR),
+        load_tracking_results(RESULTS_DIR),
+        load_edge_rows(RESULTS_DIR),
+    )
+    if det.empty or edge.empty:
+        return empty("Run the benchmark and edge stages first")
+    lat = edge[(edge["group"] == "main") & (edge["variant"] == "onnx_fp32")].set_index("backbone")[
+        "mean_ms"
+    ]
+    ap = det.groupby("backbone")["ap50"].mean()
+    hota = trk[trk["tracker"] == "bytetrack"].groupby("backbone")["hota"].mean()
     fig = go.Figure()
-    if results.empty or not detection_summary:
-        fig.update_layout(
-            template="plotly_dark", title="No results yet -- run the benchmark pipeline first"
-        )
-        return fig
-
-    bytetrack = results[results["tracker"] == "bytetrack"]
-    mean_mota_by_backbone = bytetrack.groupby("backbone")["mota"].mean()
-
-    latency_by_backbone: dict[str, list[float]] = {}
-    for key, entry in detection_summary.items():
-        _, backbone = key.split("/")
-        latency_by_backbone.setdefault(backbone, []).append(entry["mean_latency_ms"])
-
-    for backbone, latencies in latency_by_backbone.items():
-        if backbone not in mean_mota_by_backbone.index:
-            continue
-        mean_latency = sum(latencies) / len(latencies)
+    for bb in ap.index:
         fig.add_trace(
             go.Scatter(
-                x=[mean_latency],
-                y=[mean_mota_by_backbone[backbone]],
+                x=[lat[bb]],
+                y=[ap[bb]],
                 mode="markers+text",
-                name=backbone,
-                text=[backbone],
+                text=[bb],
                 textposition="top center",
-                marker={"size": 16, "color": BACKBONE_COLORS.get(backbone, "#e84118")},
+                name=bb,
+                marker={"size": 10 + 80 * float(hota[bb]), "opacity": 0.85},
+                hovertemplate=f"{bb}<br>AP50 %{{y:.3f}}<br>{lat[bb]:.1f} ms<br>ByteTrack HOTA {hota[bb]:.3f}<extra></extra>",
             )
         )
-
     fig.update_layout(
-        template="plotly_dark",
-        title="Detection speed vs. tracking accuracy (mean MOTA, ByteTrack)",
-        xaxis_title="Mean detection latency (ms/frame, CPU)",
-        yaxis_title="Mean MOTA across sequences",
+        template=TEMPLATE,
+        title="Detection AP50 vs CPU latency (bubble = ByteTrack HOTA)",
+        xaxis_title="ONNX CPU latency, ms/frame",
+        yaxis_title="AP50",
         showlegend=False,
     )
     return fig
 
 
-def _export_benchmark_figure() -> go.Figure:
-    export_df = load_export_benchmark(RESULTS_DIR)
+def _latency() -> go.Figure:
+    edge = load_edge_rows(RESULTS_DIR)
+    if edge.empty:
+        return empty("No edge benchmark yet -- run `make edge`")
+    main = edge[edge["group"] == "main"]
     fig = go.Figure()
-    if export_df.empty:
-        fig.update_layout(
-            template="plotly_dark", title="No export benchmark yet -- run export/benchmark.py"
-        )
-        return fig
+    for variant, label in RUNTIMES.items():
+        s = main[main["variant"] == variant]
+        fig.add_trace(go.Bar(x=s["backbone"], y=s["mean_ms"], name=label))
+    fig.update_layout(
+        template=TEMPLATE,
+        barmode="group",
+        title="Measured latency by runtime",
+        yaxis_title="ms / frame (lower is better)",
+    )
+    return fig
 
-    for variant in export_df["variant"].unique():
-        subset = export_df[export_df["variant"] == variant]
+
+def _resolution() -> go.Figure:
+    edge = load_edge_rows(RESULTS_DIR)
+    if edge.empty:
+        return empty("No edge benchmark yet")
+    res = edge[edge["group"] == "resolution"]
+    fig = go.Figure()
+    for bb, g in res.groupby("backbone"):
+        g = g.sort_values("long_side")
         fig.add_trace(
-            go.Bar(x=subset["backbone"], y=subset["mean_latency_ms"], name=variant)
+            go.Scatter(
+                x=g["mean_ms"],
+                y=g["ap50"],
+                mode="lines+markers+text",
+                text=g["long_side"].astype(int),
+                textposition="bottom right",
+                name=str(bb),
+            )
         )
     fig.update_layout(
-        template="plotly_dark",
-        title="Edge export latency: PyTorch FP32 vs ONNX FP32 vs ONNX INT8",
-        xaxis_title="Backbone",
-        yaxis_title="Mean latency (ms/frame, CPU)",
-        barmode="group",
+        template=TEMPLATE,
+        title="Input resolution: AP50 vs latency",
+        xaxis_type="log",
+        xaxis_title="CPU ms/frame (log)",
+        yaxis_title="AP50",
     )
     return fig
 
@@ -112,9 +115,10 @@ def layout() -> html.Div:
             html.H2("Backbone Benchmark"),
             dbc.Row(
                 [
-                    dbc.Col(dcc.Graph(figure=_speed_accuracy_figure()), width=6),
-                    dbc.Col(dcc.Graph(figure=_export_benchmark_figure()), width=6),
+                    dbc.Col(dcc.Graph(figure=_scatter()), md=6),
+                    dbc.Col(dcc.Graph(figure=_latency()), md=6),
                 ]
             ),
+            dbc.Row([dbc.Col(dcc.Graph(figure=_resolution()), md=12)]),
         ]
     )

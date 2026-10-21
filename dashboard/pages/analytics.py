@@ -1,14 +1,4 @@
-"""Derived analytics: trajectories, line-crossing counts, and an
-occupancy heatmap, computed live (in-callback) from cached detections run
-through ByteTrack for the selected sequence/backbone.
-
-Running ByteTrack live here (rather than pre-computing and caching this
-page's output) is deliberate: it only replays already-cached detections
-through a Kalman-filter-and-Hungarian-matching loop with no neural
-network inference involved, which takes well under a second even for a
-1000+ frame sequence -- there's no accuracy/latency trade-off being hidden
-by not caching it, just less to keep in sync.
-"""
+"""Analytics over a replayed tracker: trajectories, occupancy heatmap, line crossings and dwell time."""
 
 from __future__ import annotations
 
@@ -19,22 +9,15 @@ import dash_bootstrap_components as dbc
 import numpy as np
 import plotly.graph_objects as go
 from dash import Input, Output, callback, dcc, html
-from data_loader import available_sequences, load_sequence_ground_truth
+from data_loader import available_sequences, load_sequence_ground_truth, tracks_for
+from theme import TEMPLATE, empty
 
-from emot.analytics.trajectories import (
-    CountingLine,
-    build_trajectories,
-    count_line_crossings,
-    occupancy_heatmap,
-)
-from emot.data.mot17 import iter_frame_indices
-from emot.detection.yolo import Detection
-from emot.tracking.bytetrack import ByteTracker
-from emot.training.tracking_runner import load_cached_detections
+from emot.analytics.events import Zone, dwell_stats
+from emot.analytics.trajectories import CountingLine, build_trajectories, occupancy_heatmap
+from emot.benchmark.replay import VARIANTS
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_ROOT = REPO_ROOT / "data" / "mot17"
-CACHE_DIR = REPO_ROOT / "cache" / "detections"
 BACKBONES = ["yolov8n", "yolov8s", "yolov8m", "yolo11n", "yolo11s", "yolo11m"]
 
 dash.register_page(__name__, path="/analytics", name="Analytics")
@@ -42,8 +25,6 @@ dash.register_page(__name__, path="/analytics", name="Analytics")
 
 def layout() -> html.Div:
     sequences = available_sequences(DATA_ROOT)
-    default_sequence = sequences[0] if sequences else None
-
     return html.Div(
         [
             html.H2("Video Analytics"),
@@ -52,18 +33,29 @@ def layout() -> html.Div:
                     dbc.Col(
                         dcc.Dropdown(
                             id="an-sequence",
+                            clearable=False,
+                            value=sequences[0] if sequences else None,
                             options=[{"label": s, "value": s} for s in sequences],
-                            value=default_sequence,
                         ),
-                        width=4,
+                        md=3,
                     ),
                     dbc.Col(
                         dcc.Dropdown(
                             id="an-backbone",
+                            clearable=False,
+                            value="yolo11s",
                             options=[{"label": b, "value": b} for b in BACKBONES],
-                            value="yolo11n",
                         ),
-                        width=4,
+                        md=3,
+                    ),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id="an-tracker",
+                            clearable=False,
+                            value="botsort",
+                            options=[{"label": v.label, "value": k} for k, v in VARIANTS.items()],
+                        ),
+                        md=3,
                     ),
                 ],
                 className="mb-3",
@@ -71,27 +63,12 @@ def layout() -> html.Div:
             html.Div(id="an-counts-summary", className="mb-3"),
             dbc.Row(
                 [
-                    dbc.Col(dcc.Graph(id="an-trajectories"), width=6),
-                    dbc.Col(dcc.Graph(id="an-heatmap"), width=6),
+                    dbc.Col(dcc.Graph(id="an-trajectories"), md=6),
+                    dbc.Col(dcc.Graph(id="an-heatmap"), md=6),
                 ]
             ),
         ]
     )
-
-
-def _compute_tracks_by_frame(sequence: str, backbone: str) -> dict[int, dict[int, np.ndarray]]:
-    cache_path = CACHE_DIR / sequence / f"{backbone}.npz"
-    if not cache_path.exists():
-        return {}
-    detections_by_frame: dict[int, list[Detection]] = load_cached_detections(cache_path)
-    seq_info, _ = load_sequence_ground_truth(DATA_ROOT, sequence)
-
-    tracker = ByteTracker()
-    frames: dict[int, dict[int, np.ndarray]] = {}
-    for frame_idx in iter_frame_indices(seq_info):
-        tracks = tracker.update(detections_by_frame.get(frame_idx, []))
-        frames[frame_idx] = {t.track_id: t.xyxy for t in tracks}
-    return frames
 
 
 @callback(
@@ -100,58 +77,65 @@ def _compute_tracks_by_frame(sequence: str, backbone: str) -> dict[int, dict[int
     Output("an-counts-summary", "children"),
     Input("an-sequence", "value"),
     Input("an-backbone", "value"),
+    Input("an-tracker", "value"),
 )
-def update_analytics(sequence: str | None, backbone: str):
-    empty_fig = go.Figure().update_layout(template="plotly_dark")
+def update_analytics(sequence: str | None, backbone: str, tracker: str):
     if sequence is None:
-        return empty_fig, empty_fig, "Select a sequence."
-
-    frames = _compute_tracks_by_frame(sequence, backbone)
-    if not frames:
-        msg = f"No cached detections for {sequence}/{backbone} yet."
-        return empty_fig, empty_fig, msg
-
-    seq_info, _ = load_sequence_ground_truth(DATA_ROOT, sequence)
+        return empty(""), empty(""), "Select a sequence."
+    try:
+        raw = tracks_for(sequence, backbone, tracker, DATA_ROOT, REPO_ROOT / "cache")
+    except FileNotFoundError:
+        return empty(""), empty(""), f"No cached detections for {sequence}/{backbone} yet."
+    info, _ = load_sequence_ground_truth(DATA_ROOT, sequence)
+    frames = {f: {tid: xyxy for tid, xyxy, _ in rows} for f, rows in raw.items()}
     trajectories = build_trajectories(frames)
 
-    traj_fig = go.Figure()
-    for track_id, history in trajectories.items():
-        if len(history.centers) < 2:
+    traj = go.Figure()
+    for tid, h in trajectories.items():
+        if len(h.foot_points) < 2:
             continue
-        xs, ys = zip(*history.centers, strict=True)
-        traj_fig.add_trace(
-            go.Scatter(x=xs, y=ys, mode="lines", name=f"track {track_id}", showlegend=False)
+        xs, ys = zip(*h.foot_points, strict=True)
+        traj.add_trace(
+            go.Scatter(
+                x=xs, y=ys, mode="lines", showlegend=False, line={"width": 1.5}, name=f"track {tid}"
+            )
         )
-    traj_fig.update_xaxes(visible=False, range=[0, seq_info.im_width])
-    traj_fig.update_yaxes(visible=False, range=[seq_info.im_height, 0], scaleanchor="x")
-    traj_fig.update_layout(
-        template="plotly_dark",
-        title=f"Trajectories ({len(trajectories)} tracks)",
+    traj.update_xaxes(visible=False, range=[0, info.im_width])
+    traj.update_yaxes(visible=False, range=[info.im_height, 0], scaleanchor="x")
+    traj.update_layout(
+        template=TEMPLATE,
+        title=f"Foot-point trajectories ({len(trajectories)} tracks)",
         margin={"l": 0, "r": 0, "t": 40, "b": 0},
     )
 
-    heatmap = occupancy_heatmap(trajectories, seq_info.im_width, seq_info.im_height, bins=40)
-    heatmap_fig = go.Figure(
-        data=go.Heatmap(z=heatmap.T, colorscale="Inferno", showscale=False)
-    )
-    heatmap_fig.update_xaxes(visible=False)
-    heatmap_fig.update_yaxes(visible=False, autorange="reversed")
-    heatmap_fig.update_layout(
-        template="plotly_dark",
-        title="Occupancy heatmap",
-        margin={"l": 0, "r": 0, "t": 40, "b": 0},
+    heat = occupancy_heatmap(trajectories, info.im_width, info.im_height, bins=40)
+    hm = go.Figure(go.Heatmap(z=heat.T, colorscale="Magma", showscale=False))
+    hm.update_xaxes(visible=False)
+    hm.update_yaxes(visible=False, autorange="reversed")
+    hm.update_layout(
+        template=TEMPLATE, title="Occupancy heatmap", margin={"l": 0, "r": 0, "t": 40, "b": 0}
     )
 
-    # A vertical counting line at the frame's horizontal midpoint -- a
-    # reasonable default for "people crossing through the middle of the
-    # scene" without per-sequence tuning, which a real deployment would do.
-    mid_x = seq_info.im_width / 2
-    line = CountingLine(mid_x, 0, mid_x, seq_info.im_height)
-    counts = count_line_crossings(trajectories, line)
+    # Defaults a real deployment would configure: a vertical line through the middle and the centre zone.
+    from emot.analytics.events import crossing_events
+
+    mid = info.im_width / 2
+    events = crossing_events(
+        trajectories, CountingLine(mid, 0, mid, info.im_height), info.frame_rate
+    )
+    a = sum(e.details["direction"] == "a_to_b" for e in events)
+    zone = Zone.from_normalized(
+        "center",
+        [(0.25, 0.25), (0.75, 0.25), (0.75, 0.75), (0.25, 0.75)],
+        info.im_width,
+        info.im_height,
+    )
+    dwell = dwell_stats(trajectories, zone, info.frame_rate)
+    secs = np.array([d["seconds"] for d in dwell.values()]) if dwell else np.zeros(0)
     summary = dbc.Alert(
-        f"Line crossings at x={mid_x:.0f}: left->right = {counts['a_to_b']}, "
-        f"right->left = {counts['b_to_a']} (out of {len(trajectories)} total tracks)",
+        f"Middle line: {a} crossings A->B, {len(events) - a} B->A. Centre zone: {len(dwell)} people entered, "
+        f"mean stay {secs.mean() if len(secs) else 0:.1f} s, longest {secs.max() if len(secs) else 0:.1f} s. "
+        f"({len(trajectories)} anonymous track IDs in total.)",
         color="info",
     )
-
-    return traj_fig, heatmap_fig, summary
+    return traj, hm, summary

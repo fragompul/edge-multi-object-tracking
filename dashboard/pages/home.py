@@ -5,52 +5,50 @@ from pathlib import Path
 import dash
 import dash_bootstrap_components as dbc
 from dash import html
-from data_loader import load_detection_summary, load_tracking_results
+from data_loader import load_edge_rows, load_tracking_results
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 RESULTS_DIR = REPO_ROOT / "results"
-CACHE_DIR = REPO_ROOT / "cache" / "detections"
 
 dash.register_page(__name__, path="/", name="Overview")
 
 
-def _stat_card(label: str, value: str) -> dbc.Card:
+def _stat(label: str, value: str) -> dbc.Card:
     return dbc.Card(
         dbc.CardBody(
-            [
-                html.H2(value, className="card-title"),
-                html.P(label, className="card-text text-muted"),
-            ]
+            [html.Div(value, className="stat-value"), html.Div(label, className="text-muted")]
         ),
-        className="text-center shadow-sm",
+        className="text-center",
     )
 
 
 def layout() -> html.Div:
-    results = load_tracking_results(RESULTS_DIR)
-    detection_summary = load_detection_summary(CACHE_DIR)
-
-    n_sequences = results["sequence"].nunique() if not results.empty else 0
-    n_backbones = results["backbone"].nunique() if not results.empty else 0
-    n_runs = len(results)
-    n_cached_detection_jobs = len(detection_summary)
-
+    trk = load_tracking_results(RESULTS_DIR)
+    edge = load_edge_rows(RESULTS_DIR)
+    best = (
+        trk.groupby("label")["hota"].mean().sort_values(ascending=False) if not trk.empty else None
+    )
     return html.Div(
         [
-            html.H1("Edge Multi-Object Tracking"),
+            html.H1(["See every identity. ", html.Span("On the edge.", className="grad")]),
             html.P(
-                "Multi-object detection and tracking on MOT17: a YOLOv8/YOLO11 backbone "
-                "speed-vs-accuracy benchmark, ByteTrack vs DeepSORT comparison, ONNX/INT8 "
-                "edge export, and derived video analytics (trajectories, counting, heatmaps).",
-                className="lead",
+                "The local lab: explore the benchmark (7 MOT17 sequences x 6 YOLO backbones x 7 tracker "
+                "variants), replay any tracker over the cached detections, and derive analytics. "
+                "The public showcase is the static EMOT Studio web app.",
+                className="lead text-muted",
             ),
             dbc.Row(
                 [
-                    dbc.Col(_stat_card("Sequences benchmarked", str(n_sequences)), width=3),
-                    dbc.Col(_stat_card("Backbones compared", str(n_backbones)), width=3),
-                    dbc.Col(_stat_card("Tracking runs completed", str(n_runs)), width=3),
+                    dbc.Col(_stat("tracking runs", str(len(trk))), md=3),
                     dbc.Col(
-                        _stat_card("Detection caches built", str(n_cached_detection_jobs)), width=3
+                        _stat("sequences", str(trk["sequence"].nunique() if len(trk) else 0)), md=3
+                    ),
+                    dbc.Col(_stat("edge measurements", str(len(edge))), md=3),
+                    dbc.Col(
+                        _stat(
+                            "best mean HOTA", f"{best.iloc[0]:.3f}" if best is not None else "--"
+                        ),
+                        md=3,
                     ),
                 ],
                 className="g-3 mb-4",
@@ -58,27 +56,25 @@ def layout() -> html.Div:
             dbc.Card(
                 dbc.CardBody(
                     [
-                        html.H4("Explore", className="card-title"),
+                        html.H4("Pages"),
                         html.Ul(
                             [
                                 html.Li(
-                                    "Backbone Benchmark -- speed vs. accuracy across YOLO variants"
+                                    "Backbone Benchmark -- detector AP, tracking quality and measured edge latency"
                                 ),
                                 html.Li(
-                                    "Tracker Comparison -- MOTA/IDF1/ID-switches, "
-                                    "ByteTrack vs DeepSORT"
+                                    "Tracker Comparison -- HOTA / IDF1 / MOTA / switches for every variant, by scene"
                                 ),
                                 html.Li(
-                                    "Sequence Explorer -- frame-by-frame annotated playback"
+                                    "Sequence Explorer -- replay a tracker frame by frame over the real video"
                                 ),
                                 html.Li(
-                                    "Analytics -- trajectories, line-crossing counts, heatmaps"
+                                    "Analytics -- trajectories, heatmap, line crossings, dwell in a zone"
                                 ),
                             ]
                         ),
                     ]
-                ),
-                className="shadow-sm",
+                )
             ),
         ]
     )
