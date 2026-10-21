@@ -19,6 +19,7 @@ import motmetrics as mm
 import numpy as np
 import pandas as pd
 
+from emot.evaluation.hota import HOTAAccumulator
 from emot.tracking.iou import iou_matrix
 from emot.tracking.track import Track
 
@@ -34,6 +35,11 @@ class SequenceMetrics:
     mostly_tracked: int
     mostly_lost: int
     num_frames: int
+    # HOTA family (Luiten et al., 2021): detection / association / localisation split
+    hota: float = 0.0
+    deta: float = 0.0
+    assa: float = 0.0
+    loca: float = 0.0
 
 
 def _xyxy_to_ltwh(xyxy: np.ndarray) -> np.ndarray:
@@ -76,21 +82,48 @@ class MOTAccumulator:
 
     def __init__(self, max_iou_distance: float = 0.5):
         self.acc = mm.MOTAccumulator(auto_id=True)
+        self.hota = HOTAAccumulator()
         self.max_iou_distance = max_iou_distance
 
     def update(self, gt_array: np.ndarray, predicted_tracks: list[Track]) -> None:
-        gt_ids = gt_array[:, 0].astype(int).tolist() if len(gt_array) else []
-        gt_boxes = gt_array[:, 1:5] if len(gt_array) else np.zeros((0, 4))
-
-        pred_ids = [t.track_id for t in predicted_tracks]
-        pred_boxes = (
-            np.array([_xyxy_to_ltwh(t.xyxy) for t in predicted_tracks])
-            if predicted_tracks
-            else np.zeros((0, 4))
+        self.update_arrays(
+            gt_array,
+            [t.track_id for t in predicted_tracks],
+            np.array([t.xyxy for t in predicted_tracks]) if predicted_tracks else np.zeros((0, 4)),
         )
 
+    def update_arrays(
+        self, gt_array: np.ndarray, pred_ids: list[int], pred_xyxy: np.ndarray
+    ) -> None:
+        """Same as `update`, for callers holding plain ids + `[l, t, r, b]` boxes."""
+        gt_ids = gt_array[:, 0].astype(int).tolist() if len(gt_array) else []
+        gt_boxes = gt_array[:, 1:5] if len(gt_array) else np.zeros((0, 4))
+        pred_boxes = (
+            np.array([_xyxy_to_ltwh(b) for b in pred_xyxy]) if len(pred_xyxy) else np.zeros((0, 4))
+        )
         distances = _iou_distance_matrix(gt_boxes, pred_boxes, self.max_iou_distance)
         self.acc.update(gt_ids, pred_ids, distances)
+        self.hota.update(np.array(gt_ids), gt_boxes, np.array(pred_ids), pred_boxes)
+
+    def switch_events(self) -> list[dict[str, int]]:
+        """Every identity switch as `{frame, gt_id, from_track, to_track}` (1-based frames):
+        ground-truth person `gt_id` was matched to `from_track` and is now matched to
+        `to_track`. Used to place switch markers on the demo's timelines."""
+        events = self.acc.mot_events
+        out = []
+        last_match: dict[int, int] = {}
+        for (frame_id, _), row in events.iterrows():
+            if row["Type"] in ("MATCH", "SWITCH"):
+                gt_id, track = int(row["OId"]), int(row["HId"])
+                if row["Type"] == "SWITCH":
+                    out.append({
+                        "frame": int(frame_id) + 1,
+                        "gt_id": gt_id,
+                        "from_track": last_match.get(gt_id, -1),
+                        "to_track": track,
+                    })
+                last_match[gt_id] = track
+        return out
 
     def compute(self, sequence_name: str) -> SequenceMetrics:
         metrics_host = mm.metrics.create()
@@ -110,6 +143,7 @@ class MOTAccumulator:
             name=sequence_name,
         )
         row = summary.iloc[0]
+        hota = self.hota.compute()
         return SequenceMetrics(
             mota=float(row["mota"]),
             motp=float(row["motp"]) if not pd.isna(row["motp"]) else 0.0,
@@ -120,4 +154,8 @@ class MOTAccumulator:
             mostly_tracked=int(row["mostly_tracked"]),
             mostly_lost=int(row["mostly_lost"]),
             num_frames=int(row["num_frames"]),
+            hota=hota.hota,
+            deta=hota.deta,
+            assa=hota.assa,
+            loca=hota.loca,
         )
