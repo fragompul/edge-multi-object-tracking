@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 72" role="img" aria-label="EMOT - edge multi-object tracking">
+  <defs>
+    <linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#22D3EE"/><stop offset="0.55" stop-color="#A78BFA"/><stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4 4)">
+    <g fill="none" stroke="url(#g)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 20V10a4 4 0 0 1 4-4h10"/><path d="M44 6h10a4 4 0 0 1 4 4v10"/>
+      <path d="M58 44v10a4 4 0 0 1-4 4H44"/><path d="M20 58H10a4 4 0 0 1-4-4V44"/>
+    </g>
+    <path d="M16 44C22 44 24 30 32 30S42 22 48 20" fill="none" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="16" cy="44" r="2.6" fill="#22D3EE" opacity="0.55"/>
+    <circle cx="32" cy="30" r="3" fill="#A78BFA" opacity="0.85"/>
+    <circle cx="48" cy="20" r="4.6" fill="#F472B6"/>
+  </g>
+  <g fill="none" stroke="#E6EAF7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" transform="translate(86 4)">
+    <path d="M26 12H10v40h16M10 32h14"/>
+    <path d="M42 52V12l16 24 16-24v40"/>
+    <circle cx="112" cy="32" r="20"/>
+    <path d="M142 12h32M158 12v40"/>
+  </g>
+</svg>
