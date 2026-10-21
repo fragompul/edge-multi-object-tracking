@@ -11,12 +11,17 @@ Association combines two signals per (track, detection) pair:
    following the original paper -- a single bad-angle frame shouldn't
    permanently damage a track's appearance signature).
 
-This implementation uses a single Hungarian assignment stage over the
-combined (gated) cost matrix rather than the original paper's cascaded
-per-track-age matching -- documented as a simplification in
-docs/limitations.md. It is a real difference from the paper (cascade
-matching prioritizes recently-seen tracks, which matters most in dense
-crowds with many simultaneous occlusions), not a hidden shortcut.
+Two association modes are implemented so their difference can be measured:
+
+- `cascade=False` (the original baseline of this project): one Hungarian
+  assignment over the gated appearance cost for all tracks at once.
+- `cascade=True` (the paper's matching cascade): tracks are matched in
+  order of how recently they were seen, `age = 1, 2, ..., max_age`, each
+  level against only the detections still unclaimed. A track seen one
+  frame ago therefore always wins a contested detection over one that
+  vanished 20 frames ago -- the prior that matters most in dense crowds
+  with many simultaneous occlusions. Leftovers (plus tentative tracks) get
+  a final IoU pass, exactly as in the paper.
 """
 
 from __future__ import annotations
@@ -28,6 +33,7 @@ from scipy.optimize import linear_sum_assignment
 
 from emot.detection.yolo import Detection
 from emot.tracking.iou import iou_matrix
+from emot.tracking.kalman import mahalanobis_matrix
 from emot.tracking.track import Track, TrackState
 
 MAHALANOBIS_GATE_95PCT_4DOF = 9.4877  # chi-square, 4 DOF, 95th percentile
@@ -40,6 +46,8 @@ class DeepSortConfig:
     iou_fallback_threshold: float = 0.3  # for tracks with no appearance history yet
     min_hits: int = 3
     max_age: int = 30
+    cascade: bool = False
+    min_confidence: float = 0.25  # detections below this are ignored entirely
 
 
 def _cosine_distance_to_gallery(embedding: np.ndarray, gallery: list[np.ndarray]) -> float:
@@ -59,6 +67,11 @@ class DeepSortTracker:
         self, detections: list[Detection], embeddings: np.ndarray
     ) -> list[Track]:
         cfg = self.config
+        if len(detections):
+            keep = [i for i, d in enumerate(detections) if d.confidence >= cfg.min_confidence]
+            if len(keep) != len(detections):
+                detections = [detections[i] for i in keep]
+                embeddings = embeddings[keep]
         for track in self.tracks:
             track.predict()
 
@@ -82,6 +95,36 @@ class DeepSortTracker:
 
         return [t for t in self.tracks if t.state == TrackState.CONFIRMED]
 
+    def _appearance_cost(
+        self, track_idx: list[int], det_idx: list[int], detections: list[Detection],
+        embeddings: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Gated cosine-distance cost for the given track/detection subsets."""
+        tracks = [self.tracks[i] for i in track_idx]
+        boxes = np.array([detections[j].xyxy for j in det_idx])
+        dist = mahalanobis_matrix([t.kalman for t in tracks], boxes)
+        gated = dist <= self.config.mahalanobis_gate
+        cost = np.ones((len(tracks), len(det_idx)))
+        for a, track in enumerate(tracks):
+            if not track.embeddings:
+                continue
+            cols = np.flatnonzero(gated[a])
+            if len(cols) == 0:
+                continue
+            gallery = np.stack(track.embeddings)
+            cost[a, cols] = 1.0 - (gallery @ embeddings[[det_idx[c] for c in cols]].T).max(0)
+        return cost, gated
+
+    def _hungarian(
+        self, cost: np.ndarray, gated: np.ndarray, max_cost: float
+    ) -> list[tuple[int, int]]:
+        rows, cols = linear_sum_assignment(cost)
+        return [
+            (r, c)
+            for r, c in zip(rows, cols, strict=True)
+            if gated[r, c] and cost[r, c] <= max_cost
+        ]
+
     def _match(
         self, detections: list[Detection], embeddings: np.ndarray
     ) -> tuple[list[tuple[int, int]], list[int], list[int]]:
@@ -90,49 +133,53 @@ class DeepSortTracker:
         if n_tracks == 0 or n_dets == 0:
             return [], list(range(n_tracks)), list(range(n_dets))
 
-        det_boxes = np.array([d.xyxy for d in detections])
-        cost = np.ones((n_tracks, n_dets))
-        gated = np.zeros((n_tracks, n_dets), dtype=bool)
+        matches: list[tuple[int, int]] = []
+        unmatched_dets = list(range(n_dets))
 
-        for i, track in enumerate(self.tracks):
-            for j in range(n_dets):
-                mdist = track.kalman.mahalanobis_gate(det_boxes[j])
-                if mdist > cfg.mahalanobis_gate:
-                    continue
-                gated[i, j] = True
-                cos_dist = _cosine_distance_to_gallery(embeddings[j], track.embeddings)
-                cost[i, j] = cos_dist
+        if cfg.cascade:
+            seasoned = [i for i, t in enumerate(self.tracks) if t.state != TrackState.TENTATIVE]
+            by_age: dict[int, list[int]] = {}
+            for i in seasoned:
+                by_age.setdefault(self.tracks[i].time_since_update, []).append(i)
+            for age in sorted(by_age):
+                if not unmatched_dets:
+                    break
+                t_idx = by_age[age]
+                cost, gated = self._appearance_cost(t_idx, unmatched_dets, detections, embeddings)
+                found = self._hungarian(cost, gated, cfg.max_cosine_distance)
+                matches += [(t_idx[r], unmatched_dets[c]) for r, c in found]
+                taken = {c for _, c in found}
+                unmatched_dets = [d for k, d in enumerate(unmatched_dets) if k not in taken]
+            matched_tracks = {t for t, _ in matches}
+            # IoU stage: tentative tracks and confirmed tracks seen just one frame ago
+            iou_pool = [
+                i for i, t in enumerate(self.tracks)
+                if i not in matched_tracks
+                and (t.state == TrackState.TENTATIVE or t.time_since_update == 1)
+            ]
+        else:
+            all_tracks = list(range(n_tracks))
+            cost, gated = self._appearance_cost(all_tracks, unmatched_dets, detections, embeddings)
+            matches = self._hungarian(cost, gated, cfg.max_cosine_distance)
+            matched_tracks = {t for t, _ in matches}
+            matched_dets = {d for _, d in matches}
+            unmatched_dets = [d for d in range(n_dets) if d not in matched_dets]
+            # IoU fallback: new tracks (empty gallery) always fail the cosine test above,
+            # so without this a track could never be re-confirmed on its first re-match.
+            iou_pool = [i for i in range(n_tracks) if i not in matched_tracks]
 
-        row_idx, col_idx = linear_sum_assignment(cost)
-        matches, matched_tracks, matched_dets = [], set(), set()
-        for r, c in zip(row_idx, col_idx, strict=True):
-            if gated[r, c] and cost[r, c] <= cfg.max_cosine_distance:
-                matches.append((r, c))
-                matched_tracks.add(r)
-                matched_dets.add(c)
-
-        unmatched_track_idx = [i for i in range(n_tracks) if i not in matched_tracks]
-        unmatched_det_idx = [i for i in range(n_dets) if i not in matched_dets]
-
-        # IoU fallback for the remaining pairs: new tracks (empty gallery)
-        # always fail the cosine-distance test above, so without this a
-        # track could never be re-confirmed on its very first re-match.
-        if unmatched_track_idx and unmatched_det_idx:
-            remaining_tracks = [self.tracks[i] for i in unmatched_track_idx]
-            remaining_dets = [detections[j] for j in unmatched_det_idx]
-            track_boxes = np.array([t.xyxy for t in remaining_tracks])
-            rem_det_boxes = np.array([d.xyxy for d in remaining_dets])
-            ious = iou_matrix(track_boxes, rem_det_boxes)
-            iou_cost = 1.0 - ious
-            r2, c2 = linear_sum_assignment(iou_cost)
-            for r, c in zip(r2, c2, strict=True):
+        if iou_pool and unmatched_dets:
+            track_boxes = np.array([self.tracks[i].xyxy for i in iou_pool])
+            det_boxes = np.array([detections[j].xyxy for j in unmatched_dets])
+            ious = iou_matrix(track_boxes, det_boxes)
+            rows, cols = linear_sum_assignment(1.0 - ious)
+            used_d = set()
+            for r, c in zip(rows, cols, strict=True):
                 if ious[r, c] >= cfg.iou_fallback_threshold:
-                    matches.append((unmatched_track_idx[r], unmatched_det_idx[c]))
-            unmatched_track_idx = [
-                i for i in unmatched_track_idx if i not in {m[0] for m in matches}
-            ]
-            unmatched_det_idx = [
-                j for j in unmatched_det_idx if j not in {m[1] for m in matches}
-            ]
+                    matches.append((iou_pool[r], unmatched_dets[c]))
+                    used_d.add(unmatched_dets[c])
+            unmatched_dets = [d for d in unmatched_dets if d not in used_d]
 
-        return matches, unmatched_track_idx, unmatched_det_idx
+        matched_t = {t for t, _ in matches}
+        unmatched_tracks = [i for i in range(n_tracks) if i not in matched_t]
+        return matches, unmatched_tracks, unmatched_dets
