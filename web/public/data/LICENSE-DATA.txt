@@ -1,0 +1,3 @@
+Video clips, ground-truth overlays and detections in this folder are derived from
+MOT17 (Milan et al., arXiv:1603.00831), (c) MOTChallenge, licensed CC BY-NC-SA 3.0.
+Non-commercial use with attribution; derivatives must carry the same licence.

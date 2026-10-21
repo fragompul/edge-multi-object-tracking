@@ -1,0 +1,201 @@
+{
+ "backbone": "yolo11s",
+ "clipSeconds": 10,
+ "sequences": [
+  {
+   "id": "MOT17-02",
+   "camera": "static",
+   "title": "Scene 02 \u00b7 static camera",
+   "video": "clips/MOT17-02.mp4",
+   "poster": "clips/MOT17-02.jpg",
+   "tracks": "tracks/MOT17-02.json",
+   "width": 960,
+   "height": 540,
+   "fps": 15.0,
+   "frames": 150,
+   "sourceFps": 30,
+   "startFrame": 181,
+   "meanPeople": 31.0,
+   "gtTracks": 62,
+   "cameraMotionPx": 0.21,
+   "sourceSize": [
+    1920,
+    1080
+   ]
+  },
+  {
+   "id": "MOT17-04",
+   "camera": "static",
+   "title": "Scene 04 \u00b7 static camera",
+   "video": "clips/MOT17-04.mp4",
+   "poster": "clips/MOT17-04.jpg",
+   "tracks": "tracks/MOT17-04.json",
+   "width": 960,
+   "height": 540,
+   "fps": 15.0,
+   "frames": 150,
+   "sourceFps": 30,
+   "startFrame": 301,
+   "meanPeople": 45.3,
+   "gtTracks": 83,
+   "cameraMotionPx": 0.21,
+   "sourceSize": [
+    1920,
+    1080
+   ]
+  },
+  {
+   "id": "MOT17-05",
+   "camera": "moving",
+   "title": "Scene 05 \u00b7 moving camera",
+   "video": "clips/MOT17-05.mp4",
+   "poster": "clips/MOT17-05.jpg",
+   "tracks": "tracks/MOT17-05.json",
+   "width": 640,
+   "height": 480,
+   "fps": 14.0,
+   "frames": 140,
+   "sourceFps": 14,
+   "startFrame": 253,
+   "meanPeople": 8.3,
+   "gtTracks": 133,
+   "cameraMotionPx": 5.42,
+   "sourceSize": [
+    640,
+    480
+   ]
+  },
+  {
+   "id": "MOT17-09",
+   "camera": "static",
+   "title": "Scene 09 \u00b7 static camera",
+   "video": "clips/MOT17-09.mp4",
+   "poster": "clips/MOT17-09.jpg",
+   "tracks": "tracks/MOT17-09.json",
+   "width": 960,
+   "height": 540,
+   "fps": 15.0,
+   "frames": 150,
+   "sourceFps": 30,
+   "startFrame": 166,
+   "meanPeople": 10.1,
+   "gtTracks": 26,
+   "cameraMotionPx": 0.41,
+   "sourceSize": [
+    1920,
+    1080
+   ]
+  },
+  {
+   "id": "MOT17-10",
+   "camera": "moving",
+   "title": "Scene 10 \u00b7 moving camera",
+   "video": "clips/MOT17-10.mp4",
+   "poster": "clips/MOT17-10.jpg",
+   "tracks": "tracks/MOT17-10.json",
+   "width": 960,
+   "height": 540,
+   "fps": 15.0,
+   "frames": 150,
+   "sourceFps": 30,
+   "startFrame": 16,
+   "meanPeople": 19.6,
+   "gtTracks": 57,
+   "cameraMotionPx": 4.96,
+   "sourceSize": [
+    1920,
+    1080
+   ]
+  },
+  {
+   "id": "MOT17-11",
+   "camera": "moving",
+   "title": "Scene 11 \u00b7 moving camera",
+   "video": "clips/MOT17-11.mp4",
+   "poster": "clips/MOT17-11.jpg",
+   "tracks": "tracks/MOT17-11.json",
+   "width": 960,
+   "height": 540,
+   "fps": 15.0,
+   "frames": 150,
+   "sourceFps": 30,
+   "startFrame": 541,
+   "meanPeople": 10.5,
+   "gtTracks": 75,
+   "cameraMotionPx": 4.84,
+   "sourceSize": [
+    1920,
+    1080
+   ]
+  },
+  {
+   "id": "MOT17-13",
+   "camera": "moving",
+   "title": "Scene 13 \u00b7 moving camera",
+   "video": "clips/MOT17-13.mp4",
+   "poster": "clips/MOT17-13.jpg",
+   "tracks": "tracks/MOT17-13.json",
+   "width": 960,
+   "height": 540,
+   "fps": 12.5,
+   "frames": 125,
+   "sourceFps": 25,
+   "startFrame": 229,
+   "meanPeople": 15.5,
+   "gtTracks": 110,
+   "cameraMotionPx": 12.73,
+   "sourceSize": [
+    1920,
+    1080
+   ]
+  }
+ ],
+ "trackers": [
+  {
+   "id": "bytetrack",
+   "label": "ByteTrack",
+   "color": "#22D3EE",
+   "blurb": "Motion-only. Kalman + IoU, with a second pass that rescues low-confidence boxes.",
+   "cmc": false,
+   "reid": false,
+   "embedder": null
+  },
+  {
+   "id": "botsort_cmc",
+   "label": "BoT-SORT (CMC)",
+   "color": "#A78BFA",
+   "blurb": "ByteTrack plus camera-motion compensation (optical flow + RANSAC).",
+   "cmc": true,
+   "reid": false,
+   "embedder": null
+  },
+  {
+   "id": "botsort",
+   "label": "BoT-SORT (CMC + ReID)",
+   "color": "#F472B6",
+   "blurb": "Camera-motion compensation plus OSNet appearance fused into the association cost.",
+   "cmc": true,
+   "reid": true,
+   "embedder": "osnet_x0_25"
+  },
+  {
+   "id": "deepsort",
+   "label": "DeepSORT (ResNet18)",
+   "color": "#FBBF24",
+   "blurb": "Kalman + gated cosine distance on a generic ImageNet ResNet18 embedding.",
+   "cmc": false,
+   "reid": true,
+   "embedder": "resnet18"
+  },
+  {
+   "id": "deepsort_osnet_cascade",
+   "label": "DeepSORT (OSNet + cascade)",
+   "color": "#34D399",
+   "blurb": "DeepSORT with a real ReID net (OSNet) and the paper's matching cascade.",
+   "cmc": false,
+   "reid": true,
+   "embedder": "osnet_x0_25"
+  }
+ ],
+ "license": "MOT17 (c) MOTChallenge, CC BY-NC-SA 3.0"
+}
