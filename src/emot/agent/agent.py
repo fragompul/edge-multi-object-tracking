@@ -69,10 +69,11 @@ def ask_claude(
     max_turns: int = 8,
 ) -> AgentAnswer:
     """Runs the tool-use loop until the model answers (or `max_turns` is hit)."""
-    if client is None:
+    api: Any = client
+    if api is None:
         import anthropic  # optional dependency: pip install "emot[agent]"
 
-        client = anthropic.Anthropic()
+        api = anthropic.Anthropic()
 
     messages: list[dict[str, Any]] = [
         {"role": "user", "content": f"{_context_line(store)}\n\nQuestion: {question}"}
@@ -80,7 +81,7 @@ def ask_claude(
     answer = AgentAnswer(text="", model=model)
 
     for turn in range(1, max_turns + 1):
-        response = client.messages.create(
+        response = api.messages.create(
             model=model,
             max_tokens=8000,
             system=SYSTEM_PROMPT,
