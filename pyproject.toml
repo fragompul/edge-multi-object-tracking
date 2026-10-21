@@ -45,7 +45,7 @@ dashboard = [
     "plotly>=5.22",
 ]
 agent = [
-    "anthropic>=0.40",
+    "anthropic>=1.15.0",
 ]
 vision = [
     "clip @ git+https://github.com/ultralytics/CLIP.git",
