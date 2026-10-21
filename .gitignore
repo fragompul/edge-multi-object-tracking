@@ -21,6 +21,9 @@ htmlcov/
 /checkpoints/
 /cache/
 /exports/
+/weights/
+/runs/
+/outputs/
 *.pt
 *.onnx
 *.avi
@@ -29,3 +32,16 @@ htmlcov/
 # misc
 *.log
 .DS_Store
+
+# web app
+web/node_modules/
+web/dist/
+web/public/brand/
+web/public/ort/
+site/
+.vite/
+*.tsbuildinfo
+
+# ...but the web demo's data and models ARE committed (the site builds in CI without MOT17/weights)
+!web/public/data/clips/*.mp4
+!web/public/models/*.onnx
