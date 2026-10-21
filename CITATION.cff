@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "EMOT: edge multi-object tracking"
+type: software
+version: 1.0.0
+date-released: 2026-10-21
+license: MIT
+repository-code: "https://github.com/fragompul/edge-multi-object-tracking"
+authors:
+  - family-names: "Gómez Pulido"
+    given-names: "Francisco Javier"
+keywords: [multi-object-tracking, yolo, bytetrack, botsort, deepsort, reid, onnx, edge-ai]
